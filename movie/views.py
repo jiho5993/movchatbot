@@ -1,9 +1,14 @@
 import requests
+import json
 
 from bs4 import BeautifulSoup as bs
 from decouple import config
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+def byte2json(body):
+    decoded = body.decode('utf-8')
+    return json.loads(decoded)
 
 class MovieAPI:
     def __init__(self):
@@ -54,13 +59,14 @@ def index(request):
         )
 
 def movie_info(request):
-    print(request.body)
+    json_result = byte2json(request.body)
+    query = json_result["action"]["params"]["sys_movie_name"]
 
     movie = MovieAPI()
 
     if request.method == 'POST':
         # print(movie.movie_info_naver("아이언맨"))
-        result = movie.movie_info_naver("아이언맨")
+        result = movie.movie_info_naver(query)
 
         if result == False:
             return JsonResponse(
