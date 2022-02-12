@@ -54,11 +54,20 @@ def index(request):
         )
 
 def movie_info(request):
+    print(request.body)
+
     movie = MovieAPI()
 
     if request.method == 'POST':
         # print(movie.movie_info_naver("아이언맨"))
         result = movie.movie_info_naver("아이언맨")
+
+        if result == False:
+            return JsonResponse(
+                {
+                    "success": False
+                }
+            )
 
         movie_card = []
 
