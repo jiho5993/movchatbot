@@ -20,7 +20,7 @@ class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
-        self.NUM_CORES = 8
+        self.NUM_CORES = 6
 
     def thread_for_crawling(self, data):
         data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
