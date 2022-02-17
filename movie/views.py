@@ -86,7 +86,7 @@ def movie_info(request):
             movie_card.append(
                 {
                     "title": mov['title'],
-                    "description": "⭐ " + mov['userRating'] + " " + actors,
+                    "description": "⭐ " + mov['userRating'] + "\n" + actors,
                     "thumbnail": {
                         "imageUrl": mov['image']
                     },
