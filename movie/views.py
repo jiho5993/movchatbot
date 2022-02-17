@@ -21,7 +21,7 @@ class MovieAPI:
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
 
-    def thread_for_crawling():
+    def thread_for_crawling(self):
         print(f"cpu count : {mp.cpu_count()}")
 
     def movie_info_naver(self, name):
