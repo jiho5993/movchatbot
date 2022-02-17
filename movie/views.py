@@ -2,6 +2,9 @@ import requests
 import json
 import re
 
+import multiprocessing as mp
+from multiprocessing import Pool
+
 from bs4 import BeautifulSoup as bs
 from decouple import config
 from django.http import JsonResponse
@@ -17,6 +20,9 @@ class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
+
+    def thread_for_crawling():
+        print(f"cpu count : {mp.cpu_count}")
 
     def movie_info_naver(self, name):
         _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&display=20"
@@ -88,6 +94,7 @@ def movie_info(request):
     query = json_result["action"]["params"]["sys_movie_name"]
 
     movie = MovieAPI()
+    movie.thread_for_crawling()
 
     if request.method == 'POST':
         result = movie.movie_info_naver(query)
