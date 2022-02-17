@@ -24,15 +24,9 @@ class MovieAPI:
 
     def thread_for_crawling(self, data):
         data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
-        reversed_str = data['link'][::-1] # 링크에서 코드 뽑아오기 위함
-        code = ''
-
-        for j in reversed_str:
-            if j == '=':
-                break;
-            code = j + code
-        review = {'review': f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'}
-        data.update(review)
+        code = data['link'].split("=")[1]
+        
+        review = f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'
 
         url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
         url_res = requests.get(url)
@@ -44,7 +38,7 @@ class MovieAPI:
         playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
 
         if len(genre) > 3:
-            pubDate_info = genre[-1].get_text().strip().replace(' ','').replace('\n','').replace('\r','').replace('\t','')
+            pubDate_info = re.sub(' |\n|\r|\t', '', genre[-1].get_text().strip())
         else:
             pubDate_info = None
 
@@ -55,7 +49,7 @@ class MovieAPI:
                 age_info = ages.get_text()
                 break
 
-        outline_dict = dict(genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
+        outline_dict = dict(review=review, genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
         data.update(outline_dict)
 
         return data
