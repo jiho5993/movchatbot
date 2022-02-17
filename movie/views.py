@@ -77,6 +77,7 @@ class MovieAPI:
             result = pool.map(self.thread_for_crawling, data['items'])
 
             pool.close()
+            pool.join()
 
             return result
         else:
