@@ -20,9 +20,45 @@ class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
+        self.NUM_CORES = 4
 
-    def thread_for_crawling(self):
-        print(f"cpu count : {mp.cpu_count()}")
+    def thread_for_crawling(self, data):
+        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
+        reversed_str = data['link'][::-1] # 링크에서 코드 뽑아오기 위함
+        code = ''
+
+        for j in reversed_str:
+            if j == '=':
+                break;
+            code = j + code
+        review = {'review': f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'}
+        data.update(review)
+
+        url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
+        url_res = requests.get(url)
+        soup = bs(url_res.text,'html.parser')
+        genre = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > span")
+
+        genre_info = re.sub(' |\n|\r|\t', '', genre[0].get_text().strip())
+        nation = re.sub(' |\n|\r|\t', '', genre[1].get_text().strip())
+        playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
+
+        if len(genre) > 3:
+            pubDate_info = genre[-1].get_text().strip().replace(' ','').replace('\n','').replace('\r','').replace('\t','')
+        else:
+            pubDate_info = None
+
+        age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
+        age_info = None
+        for ages in age:
+            if ages['href'].find('grade') != -1:
+                age_info = ages.get_text()
+                break
+
+        outline_dict = dict(genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
+        data.update(outline_dict)
+
+        return data
 
     def movie_info_naver(self, name):
         _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&display=20"
@@ -35,45 +71,14 @@ class MovieAPI:
 
         if res.status_code == 200:
             data = res.json()
-            display = data['display']
-            # 설정한 영화 숫자만큼 체크
-            for i in range(display):
-                data['items'][i]['title'] = re.sub('<b>|</b>', '', data['items'][i]['title']) # 영화 제목에 들어간 <b> </b> 제거
-                reversed_str = data['items'][i]['link'][::-1] # 링크에서 코드 뽑아오기 위함
-                code = ''
 
-                for j in reversed_str:
-                    if j == '=':
-                        break;
-                    code = j + code
-                review = {'review': f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'}
-                data['items'][i].update(review)
+            pool = Pool(self.NUM_CORES)
 
-                url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
-                url_res = requests.get(url)
-                soup = bs(url_res.text,'html.parser')
-                genre = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > span")
+            result = pool.map(self.thread_for_crawling, data['items'])
 
-                genre_info = re.sub(' |\n|\r|\t', '', genre[0].get_text().strip())
-                nation = re.sub(' |\n|\r|\t', '', genre[1].get_text().strip())
-                playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
+            pool.close()
 
-                if len(genre) > 3:
-                    pubDate_info = genre[-1].get_text().strip().replace(' ','').replace('\n','').replace('\r','').replace('\t','')
-                else:
-                    pubDate_info = None
-
-                age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
-                age_info = None
-                for ages in age:
-                    if ages['href'].find('grade') != -1:
-                        age_info = ages.get_text()
-                        break
-
-                outline_dict = dict(genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
-                data['items'][i].update(outline_dict)
-
-            return data['items']
+            return result
         else:
             print ('Error : {}'.format(res.status_code))
             return '에러가 발생하였습니다.'
@@ -94,7 +99,6 @@ def movie_info(request):
     query = json_result["action"]["params"]["sys_movie_name"]
 
     movie = MovieAPI()
-    movie.thread_for_crawling()
 
     if request.method == 'POST':
         result = movie.movie_info_naver(query)
