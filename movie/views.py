@@ -65,7 +65,6 @@ def movie_info(request):
     movie = MovieAPI()
 
     if request.method == 'POST':
-        # print(movie.movie_info_naver("아이언맨"))
         result = movie.movie_info_naver(query)
 
         if result == False:
@@ -76,6 +75,8 @@ def movie_info(request):
             )
 
         movie_card = []
+
+        result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
 
         for mov in result:
             actors = mov['actor'].split('|')

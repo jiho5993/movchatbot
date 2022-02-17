@@ -1,3 +1,6 @@
+# ./scripts/git-commit.sh check
+# ./scripts/git-commit.sh push "msg"
+
 if [ "$1" = "check" ]
 then
     python manage.py check --deploy
