@@ -22,7 +22,7 @@ class MovieAPI:
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
 
     def thread_for_crawling():
-        print(f"cpu count : {mp.cpu_count}")
+        print(f"cpu count : {mp.cpu_count()}")
 
     def movie_info_naver(self, name):
         _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&display=20"
