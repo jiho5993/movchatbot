@@ -20,7 +20,7 @@ class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
-        self.NUM_CORES = 6
+        self.NUM_CORES = 4
 
     def thread_for_crawling(self, data):
         data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
@@ -110,11 +110,10 @@ def movie_info(request):
                 }
             )
 
+        result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
         movie_card = []
 
-        result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
-
-        for idx, mov in enumerate(result):
+        for mov in result:
             actors = mov['actor'].split('|')[:2]
             actors = ", ".join(actors) + " 등"
 
