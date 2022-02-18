@@ -23,7 +23,7 @@ class MovieAPI:
 
         self.KOFIC_KEY = config("KOFIC_KEY")
 
-        self.NUM_CORES = 4
+        self.NUM_CORES = 2
 
     def get_naver(self, name, year):
         if year == '':
