@@ -39,8 +39,8 @@ class MovieAPI:
         res = requests.get(_url, headers=_header).json()
 
         # print("2 -----------------------------------")
-        print(_url)
-        pprint(res)
+        # print(_url)
+        # pprint(res)
 
         if res['items'] == []:
             return False
