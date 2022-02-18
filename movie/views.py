@@ -20,55 +20,88 @@ class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
         self.NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
+
+        self.KOFIC_KEY = config("KOFIC_KEY")
+
         self.NUM_CORES = 4
 
-    def thread_for_crawling(self, data):
-        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
-        code = data['link'].split("=")[1]
-        
-        review = f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'
+    def get_naver(self, name, year):
+        if year == '':
+            return False
 
-        url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
-        url_res = requests.get(url)
-        soup = bs(url_res.text,'html.parser')
-        genre = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > span")
-
-        genre_info = re.sub(' |\n|\r|\t', '', genre[0].get_text().strip())
-        nation = re.sub(' |\n|\r|\t', '', genre[1].get_text().strip())
-        playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
-
-        if len(genre) > 3:
-            pubDate_info = re.sub(' |\n|\r|\t', '', genre[-1].get_text().strip())
-        else:
-            pubDate_info = None
-
-        age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
-        age_info = None
-        for ages in age:
-            if ages['href'].find('grade') != -1:
-                age_info = ages.get_text()
-                break
-
-        outline_dict = dict(review=review, genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
-        data.update(outline_dict)
-
-        return data
-
-    def movie_info_naver(self, name):
-        _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&display=20"
+        name = re.sub("&", '', name)
+        _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&yearfrom={year}&yearto={year}"
         _header = {
             "X-Naver-Client-Id": self.NAVER_CLIENT_ID,
             "X-Naver-Client-Secret": self.NAVER_CLIENT_SECRET
         }
 
-        res = requests.get(_url, headers=_header)
+        res = requests.get(_url, headers=_header).json()
+
+        # print("2 -----------------------------------")
+        print(_url)
+        pprint(res)
+
+        if res['items'] == []:
+            return False
+
+        movie = res['items'][0]
+
+        del movie["title"]
+        del movie["subtitle"]
+        del movie["pubDate"]
+
+        return movie
+
+    def thread_for_crawling(self, data):
+        movieNm = data["movieNm"]
+        year = data["prdtYear"]
+        # print("1 -----------------------------------")
+        # pprint(data)
+        result = self.get_naver(movieNm, year)
+
+        if result is False:
+            return {
+                "isSuccess": False,
+                "userRating": "0.00"
+            }
+
+        movieCd = data["movieCd"]
+        _kofic_url = f"http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key={self.KOFIC_KEY}&movieCd={movieCd}"
+
+        res = requests.get(_kofic_url).json()
+        movie_detail = res["movieInfoResult"]["movieInfo"]
+
+        age = ""
+        if movie_detail["audits"] == []:
+            age = "전체 이용가"
+        else:
+            age = movie_detail["audits"][0]["watchGradeNm"]
+
+        outline_dict = dict(
+            title=movieNm,
+            isSuccess=True,
+            genre=data["genreAlt"],
+            nation=data["repNationNm"],
+            playtime=movie_detail["showTm"] + "분",
+            pubDate=movie_detail["openDt"],
+            age=age
+        )
+        result.update(outline_dict)
+
+        return result
+
+    def movie_list(self, movieNm):
+        _url = f"https://kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key={self.KOFIC_KEY}&movieNm={movieNm}"
+
+        res = requests.get(_url)
 
         if res.status_code == 200:
-            data = res.json()
+            data = res.json()["movieListResult"]["movieList"]
 
             pool = Pool(self.NUM_CORES)
 
-            result = pool.map(self.thread_for_crawling, data['items'])
+            result = pool.map(self.thread_for_crawling, data)
 
             pool.close()
             pool.join()
@@ -76,7 +109,7 @@ class MovieAPI:
             return result
         else:
             print ('Error : {}'.format(res.status_code))
-            return '에러가 발생하였습니다.'
+            return False
 
 # Create your views here.
 def index(request):
@@ -96,7 +129,7 @@ def movie_info(request):
     movie = MovieAPI()
 
     if request.method == 'POST':
-        result = movie.movie_info_naver(query)
+        result = movie.movie_list(query)
 
         if result == False:
             return JsonResponse(
@@ -105,10 +138,15 @@ def movie_info(request):
                 }
             )
 
+        # pprint(result)
+
         result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
         movie_card = []
 
         for mov in result:
+            if mov["isSuccess"] is False:
+                continue
+
             actors = mov['actor'].split('|')[:2]
             actors = ", ".join(actors) + " 등"
 
@@ -133,11 +171,6 @@ def movie_info(request):
                             "action": "webLink",
                             "label": "상세 정보 주소",
                             "webLinkUrl": mov['link']
-                        },
-                        {
-                            "action": "webLink",
-                            "label": "평점",
-                            "webLinkUrl": mov['review']
                         }
                     ]
                 }
