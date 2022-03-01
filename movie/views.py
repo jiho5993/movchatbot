@@ -109,8 +109,8 @@ def movie_info(request):
         movie_card = []
 
         for mov in result:
-            if mov["isSuccess"] is False:
-                continue
+            # if mov["isSuccess"] is False:
+            #     continue
 
             actors = mov['actor'].split('|')[:2]
             actors = ", ".join(actors) + " 등"
