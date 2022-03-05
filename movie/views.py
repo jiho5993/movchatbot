@@ -259,7 +259,7 @@ def movie_info(request):
                                 "title": "",
                                 "description": "",
                                 "thumbnail": {
-                                    "imageUrl": "http://dev-mk.kakao.com/dn/bot/scripts/with_barcode_blue_1x1.png",
+                                    "imageUrl": "https://t1.kakaocdn.net/openbuilder/docs_image/aaairline.jpg",
                                     "width": 800,
                                     "height": 800
                                 },
