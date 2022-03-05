@@ -202,8 +202,8 @@ def movie_info(request):
                                     "title": "DOFQTK",
                                     "description": "Boarding Number"
                                 },
-                                "title": "",
-                                "description": "",
+                                "title": "test",
+                                "description": "test",
                                 "thumbnail": {
                                     "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
                                     "width": 800,
@@ -217,22 +217,6 @@ def movie_info(request):
                                     {
                                         "title": "Flight",
                                         "description": "KE0605"
-                                    },
-                                    {
-                                        "title": "Boards",
-                                        "description": "8:50 AM"
-                                    },
-                                    {
-                                        "title": "Departs",
-                                        "description": "9:50 AM"
-                                    },
-                                    {
-                                        "title": "Terminal",
-                                        "description": "1"
-                                    },
-                                    {
-                                        "title": "Gate",
-                                        "description": "C24"
                                     }
                                 ],
                                 "itemListAlignment" : "right",
