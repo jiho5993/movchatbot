@@ -196,18 +196,22 @@ def movie_info(request):
             "template": {
                 "outputs": [
                     {
-                        "simpleText": {
-                            "text": "간단한 텍스트 요소입니다. 1"
-                        }
-                    },
-                    {
-                        "simpleText": {
-                            "text": "간단한 텍스트 요소입니다. 2"
-                        }
-                    },
-                    {
-                        "simpleText": {
-                            "text": "간단한 텍스트 요소입니다. 3"
+                        "carousel": {
+                            "type": "itemCard",
+                            "items": [
+                                {
+                                    "itemList": [
+                                        {
+                                            "title": "1",
+                                            "description": "desc"
+                                        },
+                                        {
+                                            "title": "2",
+                                            "description": "desc 2"
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     }
                 ]
