@@ -209,7 +209,15 @@ def movie_info(request):
                                             "title": "2",
                                             "description": "desc 2"
                                         }
-                                    ]
+                                    ],
+                                    "profile": {
+                                        "title": "test profile"
+                                    },
+                                    "thumbnail": {
+                                        "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
+                                        "width": 800,
+                                        "height": 400
+                                    }
                                 }
                             ]
                         }
