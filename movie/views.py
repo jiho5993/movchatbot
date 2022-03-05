@@ -23,57 +23,23 @@ class MovieAPI:
         self.NUM_CORES = 4
 
     def thread_for_crawling(self, data):
-        data['userRating'] = float(data['userRating'])
-
-        # 평점이 5.0 미만인 영화는 잘라버림
-        if data['userRating'] < 5.0:
-            return
-
-        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 태그 제거
-
-        movie_link = data['link']
-        code = movie_link.split("=")[-1]
+        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
+        code = data['link'].split("=")[1]
         
         review = f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'
 
-        url_res = requests.get(movie_link)
+        url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
+        url_res = requests.get(url)
         soup = bs(url_res.text,'html.parser')
+        genre = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > span")
 
-        # global new_info
-        new_info = soup.select("dl.info_spec")[0]
+        genre_info = re.sub(' |\n|\r|\t', '', genre[0].get_text().strip())
+        nation = re.sub(' |\n|\r|\t', '', genre[1].get_text().strip())
+        playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
 
-        is_span = new_info.find_all("span")
-        
-        playtime, genre, nation, pubDate_info = None, [], None, []
-
-        for i in is_span:
-            filtered = i.select("a")
-
-            if filtered == [] and playtime == None: # playtime
-                playtime = i.get_text().strip()
-            else: # genre / nation / pubDate_info
-                for info in filtered:
-                    p = re.compile("genre|nation|open")
-                    state = p.findall(info['href'])
-
-                    if len(state) == 0:
-                        continue
-
-                    text = info.get_text().strip()
-                    
-                    if state[0] == "genre":
-                        genre.append(text)
-                    elif state[0] == "nation":
-                        nation = text
-                    else:
-                        pubDate_info.append(text)
-
-        genre = ",".join(genre)
-        if genre == "":
-            genre = None
-
-        pubDate_info = "".join(pubDate_info)
-        if pubDate_info == "":
+        if len(genre) > 3:
+            pubDate_info = re.sub(' |\n|\r|\t', '', genre[-1].get_text().strip())
+        else:
             pubDate_info = None
 
         age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
@@ -83,14 +49,7 @@ class MovieAPI:
                 age_info = ages.get_text()
                 break
 
-        outline_dict = dict(
-            review=review,
-            genre=genre,
-            nation=nation,
-            playtime=playtime,
-            pubDate_info=pubDate_info,
-            age=age_info
-        )
+        outline_dict = dict(review=review, genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
         data.update(outline_dict)
 
         return data
@@ -113,13 +72,6 @@ class MovieAPI:
 
             pool.close()
             pool.join()
-
-            # 평점에서 걸러진 데이터 필터링
-            cnt = 0
-            for i in range(len(result)):
-                if result[i - cnt] is None:
-                    del result[i - cnt]
-                    cnt += 1
 
             return result
         else:
@@ -144,86 +96,63 @@ def movie_info(request):
     movie = MovieAPI()
 
     if request.method == 'POST':
-        # result = movie.movie_info_naver(query)
+        result = movie.movie_info_naver(query)
 
-        # if result == False:
-        #     return JsonResponse(
-        #         {
-        #             "success": False
-        #         }
-        #     )
+        if result == False:
+            return JsonResponse(
+                {
+                    "success": False
+                }
+            )
 
-        # result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
-        # movie_card = []
+        result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
+        movie_card = []
 
-        # for mov in result:
-        #     # if mov["isSuccess"] is False:
-        #     #     continue
+        for mov in result:
+            # if mov["isSuccess"] is False:
+            #     continue
 
-        #     actors = mov['actor'].split('|')[:2]
-        #     actors = ", ".join(actors) + " 등"
+            actors = mov['actor'].split('|')[:2]
+            actors = ", ".join(actors) + " 등"
 
-        #     directors = mov['director'].split('|')[:2]
-        #     directors = ", ".join(directors)
+            directors = mov['director'].split('|')[:2]
+            directors = ", ".join(directors)
 
-        #     description = "⭐ " + str(mov['userRating']) + "\n" \
-        #         + "· 개요 " + ("장르 없음" if mov['genre'] == None else mov['genre']) + " | " \
-        #         + ("국가 없음" if mov['nation'] == None else mov['nation']) + " | " \
-        #         + ("러닝타임 없음" if mov["playtime"] == None else mov["playtime"]) + "\n" \
-        #         + "· 감독 " + directors + "\n" \
-        #         + "· 출연 " + actors + "\n" \
-        #         + "· 등급 " + ("연령 등급 없음" if mov['age'] == None else mov['age'])
+            description = "⭐ " + mov['userRating'] + "\n" \
+                + "· 개요 " + mov['genre'] + " | " + mov['nation'] + " | " + mov["playtime"] + "\n" \
+                + "· 감독 " + directors + "\n" \
+                + "· 출연 " + actors + "\n" \
+                + "· 등급 " + ("연령 등급 없음" if mov['age'] == None else mov['age'])
 
-        #     movie_card.append(
-        #         {
-        #             "title": mov['title'],
-        #             "description": description,
-        #             "thumbnail": {
-        #                 "imageUrl": mov['image']
-        #             },
-        #             "buttons": [
-        #                 {
-        #                     "action": "webLink",
-        #                     "label": "상세 정보 주소",
-        #                     "webLinkUrl": mov['link']
-        #                 }
-        #             ]
-        #         }
-        #     )
-
-        result = {
-            "version": "2.0",
-            "template": {
-                "outputs": [
-                    {
-                        "carousel": {
-                            "type": "itemCard",
-                            "items": [
-                                {
-                                    "thumbnail": {
-                                        "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
-                                        "width": 800,
-                                        "height": 400
-                                    },
-                                    "profile": {
-                                        "title": "test profile"
-                                    },
-                                    "itemList": [
-                                        {
-                                            "title": "1",
-                                            "description": "desc"
-                                        },
-                                        {
-                                            "title": "2",
-                                            "description": "desc 2"
-                                        }
-                                    ]
-                                }
-                            ]
+            movie_card.append(
+                {
+                    "title": mov['title'],
+                    "description": description,
+                    "thumbnail": {
+                        "imageUrl": mov['image']
+                    },
+                    "buttons": [
+                        {
+                            "action": "webLink",
+                            "label": "상세 정보 주소",
+                            "webLinkUrl": mov['link']
                         }
-                    }
-                ]
-            }
-        }
+                    ]
+                }
+            )
 
-        return JsonResponse(result)
+        return JsonResponse(
+            {
+                "version": "2.0",
+                "template": {
+                    "outputs": [
+                        {
+                            "carousel": {
+                                "type": "basicCard",
+                                "items": movie_card
+                            }
+                        }
+                    ]
+                }
+            }
+        )
