@@ -205,61 +205,7 @@ def movie_info(request):
                                 "title": "",
                                 "description": "",
                                 "thumbnail": {
-                                    "imageUrl": "https://t1.kakaocdn.net/openbuilder/docs_image/aaairline.jpg",
-                                    "width": 800,
-                                    "height": 800
-                                },
-                                "profile": {
-                                    "title": "AA Airline",
-                                    "imageUrl": "https://t1.kakaocdn.net/openbuilder/docs_image/aaairline.jpg"
-                                },
-                                "itemList": [
-                                    {
-                                        "title": "Flight",
-                                        "description": "KE0605"
-                                    },
-                                    {
-                                        "title": "Boards",
-                                        "description": "8:50 AM"
-                                    },
-                                    {
-                                        "title": "Departs",
-                                        "description": "9:50 AM"
-                                    },
-                                    {
-                                        "title": "Terminal",
-                                        "description": "1"
-                                    },
-                                    {
-                                        "title": "Gate",
-                                        "description": "C24"
-                                    }
-                                ],
-                                "itemListAlignment" : "right",
-                                "itemListSummary": {
-                                    "title": "Total",
-                                    "description": "$4,032.54"
-                                },
-                                "buttons": [
-                                    {
-                                        "label": "View Boarding Pass",
-                                        "action": "webLink",
-                                        "webLinkUrl": "https://namu.wiki/w/%EB%82%98%EC%97%B0(TWICE)"
-                                    }
-                                ],
-                                "buttonLayout" : "vertical"
-                            }
-                        },
-                        {
-                            "itemCard": {
-                                "imageTitle": {
-                                    "title": "DOFQTK",
-                                    "description": "Boarding Number"
-                                },
-                                "title": "",
-                                "description": "",
-                                "thumbnail": {
-                                    "imageUrl": "https://t1.kakaocdn.net/openbuilder/docs_image/aaairline.jpg",
+                                    "imageUrl": "http://dev-mk.kakao.com/dn/bot/scripts/with_barcode_blue_1x1.png",
                                     "width": 800,
                                     "height": 800
                                 },
