@@ -197,7 +197,17 @@ def movie_info(request):
                 "outputs": [
                     {
                         "simpleText": {
-                            "text": "간단한 텍스트 요소입니다."
+                            "text": "간단한 텍스트 요소입니다. 1"
+                        }
+                    },
+                    {
+                        "simpleText": {
+                            "text": "간단한 텍스트 요소입니다. 2"
+                        }
+                    },
+                    {
+                        "simpleText": {
+                            "text": "간단한 텍스트 요소입니다. 3"
                         }
                     }
                 ]
