@@ -23,23 +23,57 @@ class MovieAPI:
         self.NUM_CORES = 4
 
     def thread_for_crawling(self, data):
-        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 제거
-        code = data['link'].split("=")[1]
+        data['userRating'] = float(data['userRating'])
+
+        # 평점이 5.0 미만인 영화는 잘라버림
+        if data['userRating'] < 5.0:
+            return
+
+        data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 태그 제거
+
+        movie_link = data['link']
+        code = movie_link.split("=")[-1]
         
         review = f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'
 
-        url = f'https://movie.naver.com/movie/bi/mi/basic.naver?code={code}'
-        url_res = requests.get(url)
+        url_res = requests.get(movie_link)
         soup = bs(url_res.text,'html.parser')
-        genre = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > span")
 
-        genre_info = re.sub(' |\n|\r|\t', '', genre[0].get_text().strip())
-        nation = re.sub(' |\n|\r|\t', '', genre[1].get_text().strip())
-        playtime = re.sub(' |\n|\r|\t', '', genre[2].get_text().strip())
+        # global new_info
+        new_info = soup.select("dl.info_spec")[0]
 
-        if len(genre) > 3:
-            pubDate_info = re.sub(' |\n|\r|\t', '', genre[-1].get_text().strip())
-        else:
+        is_span = new_info.find_all("span")
+        
+        playtime, genre, nation, pubDate_info = None, [], None, []
+
+        for i in is_span:
+            filtered = i.select("a")
+
+            if filtered == [] and playtime == None: # playtime
+                playtime = i.get_text().strip()
+            else: # genre / nation / pubDate_info
+                for info in filtered:
+                    p = re.compile("genre|nation|open")
+                    state = p.findall(info['href'])
+
+                    if len(state) == 0:
+                        continue
+
+                    text = info.get_text().strip()
+                    
+                    if state[0] == "genre":
+                        genre.append(text)
+                    elif state[0] == "nation":
+                        nation = text
+                    else:
+                        pubDate_info.append(text)
+
+        genre = ",".join(genre)
+        if genre == "":
+            genre = None
+
+        pubDate_info = "".join(pubDate_info)
+        if pubDate_info == "":
             pubDate_info = None
 
         age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
@@ -49,7 +83,14 @@ class MovieAPI:
                 age_info = ages.get_text()
                 break
 
-        outline_dict = dict(review=review, genre=genre_info, nation=nation, playtime=playtime, pubDate_info=pubDate_info, age=age_info)
+        outline_dict = dict(
+            review=review,
+            genre=genre,
+            nation=nation,
+            playtime=playtime,
+            pubDate_info=pubDate_info,
+            age=age_info
+        )
         data.update(outline_dict)
 
         return data
@@ -72,6 +113,13 @@ class MovieAPI:
 
             pool.close()
             pool.join()
+
+            # 평점에서 걸러진 데이터 필터링
+            cnt = 0
+            for i in range(len(result)):
+                if result[i - cnt] is None:
+                    del result[i - cnt]
+                    cnt += 1
 
             return result
         else:
@@ -118,8 +166,10 @@ def movie_info(request):
             directors = mov['director'].split('|')[:2]
             directors = ", ".join(directors)
 
-            description = "⭐ " + mov['userRating'] + "\n" \
-                + "· 개요 " + mov['genre'] + " | " + mov['nation'] + " | " + mov["playtime"] + "\n" \
+            description = "⭐ " + str(mov['userRating']) + "\n" \
+                + "· 개요 " + ("장르 없음" if mov['genre'] == None else mov['genre']) + " | " \
+                + ("국가 없음" if mov['nation'] == None else mov['nation']) + " | " \
+                + ("러닝타임 없음" if mov["playtime"] == None else mov["playtime"]) + "\n" \
                 + "· 감독 " + directors + "\n" \
                 + "· 출연 " + actors + "\n" \
                 + "· 등급 " + ("연령 등급 없음" if mov['age'] == None else mov['age'])
