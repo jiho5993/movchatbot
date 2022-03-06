@@ -62,8 +62,8 @@ def movie_info(request):
             directors = ", ".join(directors)
 
             description = "⭐ " + str(mov['userRating']) + "\n" \
-                + "· 개요 " + ("장르 없음" if mov['genre'] == None else mov['genre']) + " | " \
-                + ("국가 없음" if mov['nation'] == None else mov['nation']) + " | " \
+                + "· 개요 " + ("장르 없음" if mov['genre'] == None else mov['genre']) + " | " + "\n" \
+                + ("국가 없음" if mov['nation'] == None else mov['nation']) + " | " + "\n" \
                 + ("러닝타임 없음" if mov["playtime"] == None else mov["playtime"]) + "\n" \
                 + "· 감독 " + directors + "\n" \
                 + "· 출연 " + actors + "\n" \
