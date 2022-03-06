@@ -52,14 +52,17 @@ def movie_info(request):
         movie_card = []
 
         for mov in result:
-            # if mov["isSuccess"] is False:
-            #     continue
+            if mov['actor'] == "":
+                actors = "배우 없음"
+            else:
+                actors = mov['actor'].split('|')[:2]
+                actors = ", ".join(actors) + " 등"
 
-            actors = mov['actor'].split('|')[:2]
-            actors = ", ".join(actors) + " 등"
-
-            directors = mov['director'].split('|')[:2]
-            directors = ", ".join(directors)
+            if mov['director'] == "":
+                directors = "감독 없음"
+            else:
+                directors = mov['director'].split('|')[:2]
+                directors = ", ".join(directors)
 
             movie_card.append(
                 {
@@ -75,7 +78,7 @@ def movie_info(request):
                     "itemList": [
                         {
                             "title": "장르",
-                            "description": ("장르 없음" if mov['genre'] == None else mov['genre'])
+                            "description": mov['genre']
                         },
                         {
                             "title": "국가",
@@ -83,7 +86,7 @@ def movie_info(request):
                         },
                         {
                             "title": "러닝 타임",
-                            "description": ("러닝 타임 없음" if mov["playtime"] == None else mov["playtime"])
+                            "description": mov["playtime"]
                         },
                         {
                             "title": "감독 • 배우",

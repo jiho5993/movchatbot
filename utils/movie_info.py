@@ -18,8 +18,9 @@ class MovieAPI:
     def thread_for_crawling(self, data):
         data['userRating'] = float(data['userRating'])
 
-        # 평점이 5.0 미만인 영화는 잘라버림
-        if data['userRating'] < 5.0:
+        # 기저 사례 처리
+        # 평점이 5.0 미만이거나 이미지가 없으면 잘라버림
+        if data['userRating'] < 5.0 or data['image'] == "":
             return
 
         data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 태그 제거
@@ -62,8 +63,9 @@ class MovieAPI:
                         pubDate_info.append(text)
 
         genre = ",".join(genre)
-        if genre == "":
-            genre = None
+        # 보여줄 장르나 러닝 타임이 없으면 영화 잘라버림
+        if genre == "" or playtime is None:
+            return
 
         pubDate_info = "".join(pubDate_info)
         if pubDate_info == "":
