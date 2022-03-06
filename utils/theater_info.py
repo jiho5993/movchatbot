@@ -7,7 +7,7 @@ import re
 from datetime import datetime as dt
 from bs4 import BeautifulSoup as bs
 
-from classes.kakao_map import KakaoMap
+from utils.kakao_map import KakaoMap
 
 Cgv_list = {
     "CGV강남": {

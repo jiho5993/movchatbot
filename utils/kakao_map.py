@@ -1,9 +1,11 @@
 import urllib.request as req
 import requests
 
+from decouple import config
+
 class KakaoMap:
     def __init__(self):
-        self.KAKAO_MAP_API_KEY = "KakaoAK 1e4559e15fa9e5b29588643ac58bfab1"
+        self.KAKAO_MAP_API_KEY = config("KAKAO_MAP_API_KEY")
 
     def addr_conv_pos(self, addr):
         _kakao_url = f'https://dapi.kakao.com/v2/local/search/address.json?analyze_type=similar&page=1&size=1&query={addr}'

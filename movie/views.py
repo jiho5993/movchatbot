@@ -12,11 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from pprint import pprint
 
-from classes.movie_info import MovieAPI
-from classes.userrating_recommend import UserRating_Recommend
-from classes.kakao_map import KakaoMap
-from classes.theater_info import Theater_Info
-
+from utils.movie_info import MovieAPI
+from utils.userrating_recommend import UserRating_Recommend
+from utils.kakao_map import KakaoMap
+from utils.theater_info import Theater_Info
+           
 def byte2json(body):
     decoded = body.decode('utf-8')
     return json.loads(decoded)
@@ -39,55 +39,70 @@ def movie_info(request):
     movie = MovieAPI()
 
     if request.method == 'POST':
-        # result = movie.movie_info_naver(query)
+        result = movie.movie_info_naver(query)
 
-        # if result == False:
-        #     return JsonResponse(
-        #         {
-        #             "success": False
-        #         }
-        #     )
+        if result == False:
+            return JsonResponse(
+                {
+                    "success": False
+                }
+            )
 
-        # result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
-        # movie_card = []
+        result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
+        movie_card = []
 
-        # for mov in result:
-        #     # if mov["isSuccess"] is False:
-        #     #     continue
+        for mov in result:
+            # if mov["isSuccess"] is False:
+            #     continue
 
-        #     actors = mov['actor'].split('|')[:2]
-        #     actors = ", ".join(actors) + " 등"
+            actors = mov['actor'].split('|')[:2]
+            actors = ", ".join(actors) + " 등"
 
-        #     directors = mov['director'].split('|')[:2]
-        #     directors = ", ".join(directors)
+            directors = mov['director'].split('|')[:2]
+            directors = ", ".join(directors)
 
-        #     description = "⭐ " + str(mov['userRating']) + "\n" \
-        #         + ("장르 없음" if mov['genre'] == None else mov['genre'])
-        #         # + ("국가 없음" if mov['nation'] == None else mov['nation']) + " | " \
-        #         # + ("러닝타임 없음" if mov["playtime"] == None else mov["playtime"]) + "\n" \
-        #         # + "· 감독 " + directors + "\n" \
-        #         # + "· 출연 " + actors + "\n" \
-        #         # + "· 등급 " + ("연령 등급 없음" if mov['age'] == None else mov['age'])
-
-        #     movie_card.append(
-        #         {
-        #             "title": mov['title'],
-        #             "description": description,
-        #             "thumbnail": {
-        #                 "imageUrl": mov['image']
-        #             },
-        #             "buttons": [
-        #                 {
-        #                     "action": "webLink",
-        #                     "label": "상세 정보 주소",
-        #                     "webLinkUrl": mov['link']
-        #                 },
-        #                 {
-        #                     "action": ""
-        #                 }
-        #             ]
-        #         }
-        #     )
+            movie_card.append(
+                {
+                    "imageTitle": {
+                        "title": mov['title'],
+                        "description": "⭐ " + str(mov['userRating'])
+                    },
+                    "thumbnail": {
+                        "imageUrl": mov['image'],
+                        "width": 800,
+                        "height": 400
+                    },
+                    "itemList": [
+                        {
+                            "title": "장르",
+                            "description": ("장르 없음" if mov['genre'] == None else mov['genre'])
+                        },
+                        {
+                            "title": "국가",
+                            "description": ("국가 없음" if mov['nation'] == None else mov['nation'])
+                        },
+                        {
+                            "title": "러닝 타임",
+                            "description": ("러닝 타임 없음" if mov["playtime"] == None else mov["playtime"])
+                        },
+                        {
+                            "title": "감독 • 배우",
+                            "description": directors + " | " + actors
+                        },
+                        {
+                            "title": "등급",
+                            "description": ("연령 등급 없음" if mov['age'] == None else mov['age'])
+                        }
+                    ],
+                    "buttons": [
+                        {
+                            "action": "webLink",
+                            "label": "상세 정보 주소",
+                            "webLinkUrl": mov['link']
+                        }
+                    ]
+                }
+            )
 
         return JsonResponse(
            {
@@ -97,68 +112,7 @@ def movie_info(request):
                         {
                             "carousel": {
                                 "type": "itemCard",
-                                "items": [
-                                    {
-                                        "thumbnail": {
-                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
-                                            "width": 800,
-                                            "height": 400
-                                        },
-                                        "profile": {
-                                            "title": "test profile 1"
-                                        },
-                                        "itemList": [
-                                            {
-                                                "title": "1",
-                                                "description": "desc"
-                                            },
-                                            {
-                                                "title": "2",
-                                                "description": "desc 2"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "thumbnail": {
-                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
-                                            "width": 800,
-                                            "height": 400
-                                        },
-                                        "profile": {
-                                            "title": "test profile 2"
-                                        },
-                                        "itemList": [
-                                            {
-                                                "title": "1",
-                                                "description": "desc"
-                                            },
-                                            {
-                                                "title": "2",
-                                                "description": "desc 2"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "thumbnail": {
-                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
-                                            "width": 800,
-                                            "height": 400
-                                        },
-                                        "profile": {
-                                            "title": "test profile 3"
-                                        },
-                                        "itemList": [
-                                            {
-                                                "title": "1",
-                                                "description": "desc"
-                                            },
-                                            {
-                                                "title": "2",
-                                                "description": "desc 2"
-                                            }
-                                        ]
-                                    }
-                                ]
+                                "items": movie_card
                             }
                         }
                     ]
