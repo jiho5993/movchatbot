@@ -13,6 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from pprint import pprint
 
 from classes.movie_info import MovieAPI
+from classes.userrating_recommend import UserRating_Recommend
+from classes.kakao_map import KakaoMap
+from classes.theater_info import Theater_Info
 
 def byte2json(body):
     decoded = body.decode('utf-8')
