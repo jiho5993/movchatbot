@@ -95,57 +95,70 @@ def movie_info(request):
                 "template": {
                     "outputs": [
                         {
-                            "itemCard": {
-                                "imageTitle": {
-                                    "title": "DOFQTK",
-                                    "description": "Boarding Number"
-                                },
-                                "title": "",
-                                "description": "",
-                                "thumbnail": {
-                                    "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
-                                    "width": 800,
-                                    "height": 800
-                                },
-                                "profile": {
-                                    "title": "AA Airline",
-                                    "imageUrl": "https://t1.kakaocdn.net/openbuilder/docs_image/aaairline.jpg"
-                                },
-                                "itemList": [
+                            "carousel": {
+                                "type": "itemCard",
+                                "items": [
                                     {
-                                        "title": "Flight",
-                                        "description": "KE0605"
+                                        "thumbnail": {
+                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
+                                            "width": 800,
+                                            "height": 400
+                                        },
+                                        "profile": {
+                                            "title": "test profile 1"
+                                        },
+                                        "itemList": [
+                                            {
+                                                "title": "1",
+                                                "description": "desc"
+                                            },
+                                            {
+                                                "title": "2",
+                                                "description": "desc 2"
+                                            }
+                                        ]
                                     },
                                     {
-                                        "title": "Boards",
-                                        "description": "8:50 AM"
+                                        "thumbnail": {
+                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
+                                            "width": 800,
+                                            "height": 400
+                                        },
+                                        "profile": {
+                                            "title": "test profile 2"
+                                        },
+                                        "itemList": [
+                                            {
+                                                "title": "1",
+                                                "description": "desc"
+                                            },
+                                            {
+                                                "title": "2",
+                                                "description": "desc 2"
+                                            }
+                                        ]
                                     },
                                     {
-                                        "title": "Departs",
-                                        "description": "9:50 AM"
-                                    },
-                                    {
-                                        "title": "Terminal",
-                                        "description": "1"
-                                    },
-                                    {
-                                        "title": "Gate",
-                                        "description": "C24"
+                                        "thumbnail": {
+                                            "imageUrl": "https://w.namu.la/s/45507892b4f48b2b3d4a6386f6dae20c28376a8ef5dfb68c7cc95249ec358e3e68df77594766021173b2e6acf374b79ce02e9eeef61fcdf316659e30289e123fbddf6e5ec3492eddbc582ee5a59a2ff5d6ee84f57ad19277d179b613614364ad",
+                                            "width": 800,
+                                            "height": 400
+                                        },
+                                        "profile": {
+                                            "title": "test profile 3"
+                                        },
+                                        "itemList": [
+                                            {
+                                                "title": "1",
+                                                "description": "desc"
+                                            },
+                                            {
+                                                "title": "2",
+                                                "description": "desc 2"
+                                            }
+                                        ]
                                     }
-                                ],
-                                "itemListAlignment" : "right",
-                                "itemListSummary": {
-                                    "title": "Total",
-                                    "description": "$4,032.54"
-                                },
-                                "buttons": [
-                                    {
-                                        "label": "View Boarding Pass",
-                                        "action": "webLink",
-                                        "webLinkUrl": "https://namu.wiki/w/%EB%82%98%EC%97%B0(TWICE)"
-                                    }
-                                ],
-                                "buttonLayout" : "vertical"
+                                ]
                             }
                         }
                     ]
