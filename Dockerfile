@@ -13,3 +13,7 @@ RUN pip install -r requirements.txt
 RUN pip install gunicorn
 
 ADD . /django/
+
+EXPOSE 3000
+
+CMD ["python3", "manage.py", "runserver", "0:3000"]
