@@ -38,10 +38,13 @@ class KakaoMap:
         res = requests.get(_kakao_url, headers=_kakao_header)
 
         if res.status_code == 200:
-            if len(res.json()['documents']) == 0:
+            data = res.json()['documents']
+
+            if len(data) == 0:
                 return self.pos_conv_addr(addr, None, None, None, None)
             else:
-                return res.json()
+                data = data[0]
+                return self.pos_conv_addr(addr, data['x'], data['y'], 3000)
         else:
             print('Error : {}'.format(res.status_code))
             return '에러가 발생하였습니다.'

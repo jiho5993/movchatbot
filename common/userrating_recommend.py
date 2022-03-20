@@ -10,8 +10,10 @@ class UserRating_Recommend:
         # 현재 날짜
         self.date = dt.today().strftime("%Y%m%d")
         # genre list인 json 경로 지정, 형식 ex) genre_list = {'판타지':'1'}
-        self.path = "../staticfiles/genre"
-        self.Genre_list = json.load(f"{self.path}/genre.json")
+        self.path = "staticfiles/genre"
+
+        with open(f"{self.path}/genre.json", "r") as file:
+            self.Genre_list = json.load(file)
 
     def recommend(self, genre):
         # 존재하지 않는 장르일경우, 올바르지 못한 입력일경우

@@ -7,17 +7,24 @@ import re
 from datetime import datetime as dt
 from bs4 import BeautifulSoup as bs
 
-from utils.kakao_map import KakaoMap
+from common.kakao_map import KakaoMap
 
 class Theater_Info:
     def __init__(self):
         # 현재날짜
         self.date = dt.today().strftime("%Y%m%d")
         # 영화코드들 목록
-        self.path = "../staticfiles/theater_code"
-        self.Cgv_list = json.load(f"{self.path}/cgv.json")
-        self.MegaBox_list = json.load(f"{self.path}/megabox.json")
-        self.LotteCinema_list = json.load(f"{self.path}/megabox.json")
+        # 경로는 root directory 기준으로
+        self.path = "staticfiles/theater_code"
+        
+        with open(f"{self.path}/cgv.json", "r") as file:
+            self.Cgv_list = json.load(file)
+
+        with open(f"{self.path}/megabox.json", "r") as file:
+            self.MegaBox_list = json.load(file)
+
+        with open(f"{self.path}/lottecinema.json", "r") as file:
+            self.LotteCinema_list = json.load(file)
 
     """
     리턴 예제

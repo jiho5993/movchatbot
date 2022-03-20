@@ -1,25 +1,16 @@
-import requests
 import json
-import re
 
-import multiprocessing as mp
-from multiprocessing import Pool
-
-from bs4 import BeautifulSoup as bs
-from decouple import config
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from pprint import pprint
 
-from utils.movie_info import MovieAPI
-from utils.userrating_recommend import UserRating_Recommend
-from utils.kakao_map import KakaoMap
-from utils.theater_info import Theater_Info
-           
-def byte2json(body):
-    decoded = body.decode('utf-8')
-    return json.loads(decoded)
+from common.movie_info import MovieAPI
+from common.userrating_recommend import UserRating_Recommend
+from common.kakao_map import KakaoMap
+from common.theater_info import Theater_Info
+
+from common.utils import byte2json
 
 # Create your views here.
 def index(request):
