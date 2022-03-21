@@ -14,6 +14,8 @@ RUN pip install gunicorn
 
 ADD . /django/
 
+ENV DEBUG_MODE=False
+
 EXPOSE 3000
 
 CMD ["python3", "manage.py", "runserver", "0:3000"]

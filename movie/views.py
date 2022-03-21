@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from pprint import pprint
+from common.interface.res_interface import carouselOutput, itemCard
 
 from common.movie_info import MovieAPI
 from common.userrating_recommend import UserRating_Recommend
@@ -55,61 +56,43 @@ def movie_info(request):
                 directors = mov['director'].split('|')[:2]
                 directors = ", ".join(directors)
 
-            movie_card.append(
+            itemList = [
                 {
-                    "imageTitle": {
-                        "title": mov['title'],
-                        "description": "⭐ " + str(mov['userRating'])
-                    },
-                    "thumbnail": {
-                        "imageUrl": mov['image'],
-                        "width": 800,
-                        "height": 400
-                    },
-                    "itemList": [
-                        {
-                            "title": "장르",
-                            "description": mov['genre']
-                        },
-                        {
-                            "title": "국가",
-                            "description": ("국가 없음" if mov['nation'] == None else mov['nation'])
-                        },
-                        {
-                            "title": "러닝 타임",
-                            "description": mov["playtime"]
-                        },
-                        {
-                            "title": "감독 • 배우",
-                            "description": directors + " | " + actors
-                        },
-                        {
-                            "title": "등급",
-                            "description": ("연령 등급 없음" if mov['age'] == None else mov['age'])
-                        }
-                    ],
-                    "buttons": [
-                        {
-                            "action": "webLink",
-                            "label": "상세 정보 주소",
-                            "webLinkUrl": mov['link']
-                        }
-                    ]
+                    "title": "장르",
+                    "description": mov['genre']
+                },
+                {
+                    "title": "국가",
+                    "description": ("국가 없음" if mov['nation'] == None else mov['nation'])
+                },
+                {
+                    "title": "러닝 타임",
+                    "description": mov["playtime"]
+                },
+                {
+                    "title": "감독 • 배우",
+                    "description": directors + " | " + actors
+                },
+                {
+                    "title": "등급",
+                    "description": ("연령 등급 없음" if mov['age'] == None else mov['age'])
                 }
-            )
+            ]
 
-        return JsonResponse(
-           {
-                "version": "2.0",
-                "template": {
-                    "outputs": [
-                        {
-                            "carousel": {
-                                "type": "itemCard",
-                                "items": movie_card
-                            }
-                        }
-                    ]
+            btnList = [
+                {
+                    "action": "webLink",
+                    "label": "상세 정보 주소",
+                    "webLinkUrl": mov['link']
                 }
-            }
-        )
+            ]
+
+            movie_card.append(itemCard(
+                title=mov['title'],
+                desc="⭐ " + str(mov['userRating']),
+                img=mov['image'],
+                itemList=itemList,
+                btnList=btnList
+            ))
+
+        return JsonResponse(carouselOutput("itemCard", movie_card))

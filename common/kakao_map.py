@@ -83,7 +83,7 @@ class KakaoMap:
     """
     def pos_conv_addr(self, query, x, y, radius, error=0):
         if error == None:
-            _kakao_url = f'https://dapi.kakao.com/v2/local/search/keyword.json?page=1&sort=accuracy&query={query}'
+            _kakao_url = f'https://dapi.kakao.com/v2/local/search/keyword.json?page=1&sort=accuracy&query={query}&category_group_code=CT1'
         else:
             _kakao_url = f'https://dapi.kakao.com/v2/local/search/keyword.json?page=1&sort=accuracy&query={query}&size=15&x={x}&y={y}&radius={radius}&category_group_code=CT1'
         _kakao_header = {
