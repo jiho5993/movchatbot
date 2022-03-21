@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ $1 -eq "local" ] then
+if [ "$1" = "local" ]; then
     # remove image
     echo "=> Remove previous image..."
     docker rmi -f jiho5993/movchatbot
