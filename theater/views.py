@@ -7,7 +7,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from common.theater_info import Theater_Info
-from common.kakao_map import KakaoMap
 
 from common.utils import byte2json
 from common.interface.res_interface import *
@@ -24,34 +23,36 @@ def theater_pos(request):
 
     loc = loc1 + " " + loc2
 
-    map_api = KakaoMap()
+    map_api = Theater_Info()
 
     if request.method == 'POST':
-        addr_info = map_api.addr_conv_pos(loc)['documents']
+        theater_infos = map_api.theater(loc, 'cgv')
 
         card_list = []
 
-        for info in addr_info:
+        for name in theater_infos.keys():
+            theater = theater_infos[name]
+
             btnList = [
                 {
-                    "action": "message",
+                    "action": "webLink",
                     "label": "예매하기",
-                    "messageText": "예매완료"
+                    "webLinkUrl": theater['ticket']
                 },
                 {
-                    "action": "message",
+                    "action": "webLink",
                     "label": "영화/예매 이벤트",
-                    "messageText": "이벤트는 없습니다~"
+                    "webLinkUrl": theater['event']
                 },
                 {
                     "action": "webLink",
                     "label": "가는길 찾기",
-                    "webLinkUrl": info['place_url']
+                    "webLinkUrl": theater['nav']
                 }
             ]
             card_list.append(basicCard(
-                title=info['place_name'],
-                desc=info['road_address_name'],
+                title=name,
+                desc=theater['pos']['pos1'] + "\n" + theater['pos']['pos2'],
                 img="http://k.kakaocdn.net/dn/83BvP/bl20duRC1Q1/lj3JUcmrzC53YIjNDkqbWK/i_6piz1p.jpg",
                 btnList=btnList
             ))
