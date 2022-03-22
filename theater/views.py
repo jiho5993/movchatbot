@@ -16,7 +16,11 @@ def theater_pos(request):
     json_result = byte2json(request.body)
 
     loc1 = json_result['action']['params']['sys_location1']
-    loc2 = json_result['action']['params']['sys_location']
+
+    try:
+        loc2 = json_result['action']['params']['sys_location']
+    except KeyError:
+        loc2 = ""
 
     loc = loc1 + " " + loc2
 
