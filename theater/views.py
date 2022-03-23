@@ -1,8 +1,5 @@
-import re
-
 from pprint import pprint
 
-from decouple import config
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -22,11 +19,12 @@ def theater_pos(request):
         loc2 = ""
 
     loc = loc1 + " " + loc2
+    theater_type = json_result['action']['params']['theater']
 
     map_api = Theater_Info()
 
     if request.method == 'POST':
-        theater_infos = map_api.theater(loc, 'cgv')
+        theater_infos = map_api.theater(loc, theater_type)
 
         card_list = []
 

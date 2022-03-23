@@ -1,5 +1,3 @@
-import json
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -8,8 +6,6 @@ from common.interface.res_interface import carouselOutput, itemCard
 
 from common.movie_info import MovieAPI
 from common.userrating_recommend import UserRating_Recommend
-from common.kakao_map import KakaoMap
-from common.theater_info import Theater_Info
 
 from common.utils import byte2json
 
@@ -96,3 +92,6 @@ def movie_info(request):
             ))
 
         return JsonResponse(carouselOutput("itemCard", movie_card))
+
+def genre_recommend(request):
+    pass
