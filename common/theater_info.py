@@ -37,7 +37,7 @@ class Theater_Info:
                         'pos2': '경기 수원시 팔달구 인계동 1113-11'},
                 'ticket': 'http://www.cgv.co.kr/theaters/?areacode=02&theatercode=0041&date=20220306'}
     """ # cgv 상영관 정보 제공
-    def CGV(self, theatercode, areacode, regioncode, name, pos1, pos2, startpos):
+    def CGV(self, theatercode, areacode, regioncode, name, pos1, pos2, startpos, img):
         event = 'http://www.cgv.co.kr/culture-event/event/defaultNew.aspx#1'
         if areacode == 'None':
             ticket = f'http://www.cgv.co.kr/theaters/special/show-times.aspx?regioncode={regioncode}&theatercode={theatercode}'
@@ -49,7 +49,7 @@ class Theater_Info:
             pos2=pos2
         )
         startpos = re.sub(' |\n|\r|\t', '', startpos.strip())
-        nav_name = re.sub(' |\n|\r|\t', '', name.strip())
+        nav_name = re.sub(' |\n|\r|\t', '', pos1.strip() if pos1 != '' else pos2.strip())
         nav = f'https://map.kakao.com/?sName={startpos}&eName={nav_name}'
 
         theater_list = dict(
@@ -59,7 +59,8 @@ class Theater_Info:
             event=event,
             ticket=ticket,
             pos=pos,
-            nav=nav
+            nav=nav,
+            img=img
         ) # 상영관 이름, 현재날짜, 이벤트 링크, 예매링크, 주소지, 입력받은 주소에서 해당 상영관까지 가는길 지도 링크 제공
         return theater_list
     """
@@ -80,7 +81,7 @@ class Theater_Info:
             pos2=pos2
         )
         startpos = re.sub(' |\n|\r|\t', '', startpos.strip())
-        nav_name = re.sub(' |\n|\r|\t', '', name.strip())
+        nav_name = re.sub(' |\n|\r|\t', '', pos1.strip() if pos1 != '' else pos2.strip())
         nav = f'https://map.kakao.com/?sName={startpos}&eName={nav_name}'
 
         theater_list = dict(
@@ -113,7 +114,7 @@ class Theater_Info:
             pos2=pos2
         )
         startpos = re.sub(' |\n|\r|\t', '', startpos.strip())
-        nav_name = re.sub(' |\n|\r|\t', '', name.strip())
+        nav_name = re.sub(' |\n|\r|\t', '', pos1.strip() if pos1 != '' else pos2.strip())
         nav = f'https://map.kakao.com/?sName={startpos}&eName={nav_name}'
 
         theater_list = dict(
@@ -180,6 +181,8 @@ class Theater_Info:
             pos2 = theater['address_name']
             
             if name == 'cgv':
+                if theater['place_name'].find('(') != -1:
+                    continue
                 if theater['place_name'].find('씨네드쉐프') != -1:
                     cgv_theater = "CINE de CHEF " + theater['place_name'].split()[-1]
                     theater_code = self.Cgv_list[f'{cgv_theater}']['theaterCode']
@@ -195,7 +198,8 @@ class Theater_Info:
                     theater_code = self.Cgv_list[f'{cgv_theater}']['theaterCode']
                     areacode = self.Cgv_list[f'{cgv_theater}']['areacode']
                     regioncode = 'None'
-                theater_list[f'{cgv_theater}'] = self.CGV(theater_code, f'{areacode}', f'{regioncode}', cgv_theater, pos1, pos2, startaddr)
+                img = self.Cgv_list[f'{cgv_theater}']['img']
+                theater_list[f'{cgv_theater}'] = self.CGV(theater_code, f'{areacode}', f'{regioncode}', cgv_theater, pos1, pos2, startaddr, img)
             elif name == '메가박스':
                 if theater['place_name'].find('(') != -1:
                     continue
