@@ -58,7 +58,10 @@ class MovieAPI:
                     if state[0] == "genre":
                         genre.append(text)
                     elif state[0] == "nation":
-                        nation = text
+                        if nation is not None:
+                            nation += ", " + text
+                        else:
+                            nation = text
                     else:
                         pubDate_info.append(text)
 
