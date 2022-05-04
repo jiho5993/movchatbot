@@ -7,10 +7,8 @@ ADD requirements.txt /django/
 
 RUN apt-get update && apt-get -y install \
     libpq-dev
-RUN apt-get install -y netcat
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN pip install gunicorn
 
 ADD . /django/
 

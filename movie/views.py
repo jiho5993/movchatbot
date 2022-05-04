@@ -114,4 +114,4 @@ def box_office_rank(request):
 
             card_list.append(card)
 
-        return JsonResponse(carouselOutput("itemCard", card_list))
+        return JsonResponse(carouselOutput("basicCard", card_list))
