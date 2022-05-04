@@ -51,7 +51,7 @@ def theater_pos(request):
             card_list.append(basicCard(
                 title=name,
                 desc=theater['pos']['pos1'] + "\n" + theater['pos']['pos2'],
-                img=theater['img'] if theater_type == "cgv" else "http://k.kakaocdn.net/dn/83BvP/bl20duRC1Q1/lj3JUcmrzC53YIjNDkqbWK/i_6piz1p.jpg",
+                img=theater['img'],
                 btnList=btnList
             ))
 

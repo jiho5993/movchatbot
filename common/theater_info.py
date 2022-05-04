@@ -209,7 +209,7 @@ class Theater_Info:
                     mega_theater = re.sub(' |\n|\r|\t', '', theater['place_name'].strip())
                     theater_code = self.MegaBox_list[f'{mega_theater[4:]}']['brchNo']
                 img = self.MegaBox_list[f'{mega_theater[4:]}']['img']
-                theater_list[f'{mega_theater}'] = self.MegaBox(theater_code, mega_theater, pos1, pos2, startaddr)
+                theater_list[f'{mega_theater}'] = self.MegaBox(theater_code, mega_theater, pos1, pos2, startaddr, img)
             elif name == '롯데시네마':
                 if theater['place_name'].find('(') != -1:
                     continue

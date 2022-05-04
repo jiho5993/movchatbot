@@ -2,10 +2,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from pprint import pprint
-from common.interface.res_interface import carouselOutput, itemCard
+from common.interface.res_interface import basicCard, carouselOutput, itemCard
 
 from common.movie_info import MovieAPI
 from common.userrating_recommend import UserRating_Recommend
+from common.box_office_rank import BoxOffice
 
 from common.utils import byte2json
 
@@ -95,3 +96,22 @@ def movie_info(request):
 
 def genre_recommend(request):
     pass
+
+def box_office_rank(request):
+    if request.method == 'POST':
+        bo = BoxOffice()
+
+        bo = bo.createBoxOfficeList()
+
+        card_list = []
+        for i, item in enumerate(bo):
+            title = item['title']
+            rank = str(i + 1) + "위"
+            img = item['thumb']
+
+            card = basicCard(title, rank, img, None)
+            del card['buttons']
+
+            card_list.append(card)
+
+        return JsonResponse(carouselOutput("itemCard", card_list))
