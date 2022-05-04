@@ -72,7 +72,7 @@ class Theater_Info:
             'nav': 'https://map.kakao.com/?sName=서울강서구&eName=메가박스마곡',
             'pos': {'pos1': '서울 강서구 공항대로 247', 'pos2': '서울 강서구 마곡동 797-1'}
     """ # 메가박스 상영관 정보 제공
-    def MegaBox(self, theatercode, name, pos1, pos2, startpos):
+    def MegaBox(self, theatercode, name, pos1, pos2, startpos, img):
         event = 'https://www.megabox.co.kr/event'
         ticket = f'https://www.megabox.co.kr/theater?brchNo={theatercode}'
         
@@ -91,7 +91,8 @@ class Theater_Info:
             event=event,
             ticket=ticket,
             pos=pos,
-            nav=nav
+            nav=nav,
+            img=img
         )
         return theater_list
 
@@ -105,7 +106,7 @@ class Theater_Info:
                'pos': {'pos1': '서울 강서구 하늘길 지하 77', 'pos2': '서울 강서구 방화동 886'},
                'ticket': 'https://www.lottecinema.co.kr/NLCHS/Cinema/Detail?divisionCode=1&detailDivisionCode=1&cinemaID=1009'}
     """ # 롯데시네마 상영관 정보 제공
-    def LotteCinema(self, divcode, detaildiv_code, cinema_code, name, pos1, pos2, startpos):
+    def LotteCinema(self, divcode, detaildiv_code, cinema_code, name, pos1, pos2, startpos, img):
         event = 'https://event.lottecinema.co.kr/NLCHS/Event'
         ticket = f'https://www.lottecinema.co.kr/NLCHS/Cinema/Detail?divisionCode={divcode}&detailDivisionCode={detaildiv_code}&cinemaID={cinema_code}'
         
@@ -124,7 +125,8 @@ class Theater_Info:
             event=event,
             ticket=ticket,
             pos=pos,
-            nav=nav
+            nav=nav,
+            img=img
         )
         return theater_list
 
@@ -206,6 +208,7 @@ class Theater_Info:
                 else:
                     mega_theater = re.sub(' |\n|\r|\t', '', theater['place_name'].strip())
                     theater_code = self.MegaBox_list[f'{mega_theater[4:]}']['brchNo']
+                img = self.MegaBox_list[f'{mega_theater[4:]}']['img']
                 theater_list[f'{mega_theater}'] = self.MegaBox(theater_code, mega_theater, pos1, pos2, startaddr)
             elif name == '롯데시네마':
                 if theater['place_name'].find('(') != -1:
@@ -215,6 +218,7 @@ class Theater_Info:
                     div_code = self.LotteCinema_list[f'{lotte_theater[5:]}']['divisionCode']
                     detaildiv_code = self.LotteCinema_list[f'{lotte_theater[5:]}']['detailDivisionCode']
                     cinema_code = self.LotteCinema_list[f'{lotte_theater[5:]}']['cinemaID']
-                theater_list[f'{lotte_theater}'] = self.LotteCinema(div_code, detaildiv_code, cinema_code, lotte_theater, pos1, pos2, startaddr)   
+                img = self.LotteCinema_list[f'{lotte_theater[5:]}']['img']
+                theater_list[f'{lotte_theater}'] = self.LotteCinema(div_code, detaildiv_code, cinema_code, lotte_theater, pos1, pos2, startaddr, img)   
 
         return theater_list
