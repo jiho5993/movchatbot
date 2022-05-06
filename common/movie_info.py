@@ -3,6 +3,7 @@ import re
 
 import multiprocessing as mp
 from multiprocessing import Pool
+from datetime import datetime
 
 from bs4 import BeautifulSoup as bs
 from decouple import config
@@ -123,3 +124,100 @@ class MovieAPI:
         else:
             print ('Error : {}'.format(res.status_code))
             return '에러가 발생하였습니다.'
+
+    def __getBoxOfficeInfo(self):
+        _url = "https://search.naver.com/search.naver?where=nexearch&query=박스오피스순위"
+        html = requests.get(_url)
+        soup = bs(html.text, 'html.parser')
+        
+        res = soup.select("div._panel_popular > div.list_image_info > div.list_image_box > ul._panel")
+        return res[0] # index 0 is popular panel
+    
+    def createBoxOfficeList(self):
+        result = []
+        data = self.__getBoxOfficeInfo()
+
+        is_li = data.select("li")
+
+        for i in range(10):
+            img = is_li[i].select("img")[0]
+
+            title = img["alt"]
+            thumb = img["src"]
+            
+            result.append(
+                dict(
+                    title=title,
+                    thumb=thumb
+                )
+            )
+        
+        return result
+
+    def __getNowPlaying(self):
+        _url = "https://movie.naver.com/movie/running/current.naver?view=list&tab=normal&order=open"
+        html = requests.get(_url)
+        soup = bs(html.text, 'html.parser')
+        
+        res = soup.select("#content > div.article > div > div.lst_wrap > ul > li")
+        return res
+
+    def createNowPlaying(self, order='open'):
+        res = []
+
+        movie_list = self.__getNowPlaying()
+
+        now = datetime.now()
+
+        for i in movie_list:
+            try:
+                # date
+                date = i.select_one("dl.info_txt1 > dd")
+                date = date.text.split("|")
+                date = re.sub(' |\r|\n|\t|개봉|[.]', '', date[2])
+
+                open_date = datetime.strptime(date, "%Y%m%d")
+
+                date_diff = now - open_date
+
+                if date_diff.days > 15:
+                    break
+
+                # age
+                age = i.select_one("dt.tit > span")
+                if age is not None:
+                    age = age.text
+
+                # title
+                title = i.select_one("dt.tit > a").text
+
+                # img, link
+                img = i.select_one("div.thumb > a > img")
+                link = i.select_one("div.thumb > a")
+
+                # star point
+                star = i.select_one("dl.lst_dsc > dd.star > dl.info_star > dd > div.star_t1 > a > span.num")
+                star = float(star.text)
+
+                pointing_man = i.select_one("dl.lst_dsc > dd.star > dl.info_star > dd > div.star_t1 > a > span.num2 > em")
+                pointing_man = int(re.sub(',', '', pointing_man.text))
+
+                res.append(dict(
+                    age = age,
+                    title = title,
+                    date = date,
+                    img = img["src"],
+                    link = f"https://movie.naver.com{link['href']}",
+                    star = star,
+                    man = pointing_man
+                ))
+            except:
+                print(f"this is error ----------- {i}")
+
+        # 정렬 기준
+        if order == 'open':
+            pass
+        elif order == 'point':
+            res = sorted(res, key=(lambda x: (x['man'], x['star'])), reverse=True)
+
+        return res

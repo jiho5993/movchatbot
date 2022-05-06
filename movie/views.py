@@ -1,12 +1,12 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
 
 from pprint import pprint
-from common.interface.res_interface import basicCard, carouselOutput, itemCard
+from common.interface.res_interface import TextAndCarouselOutput, basicCard, carouselOutput, itemCard
 
 from common.movie_info import MovieAPI
 from common.userrating_recommend import UserRating_Recommend
-from common.box_office_rank import BoxOffice
 
 from common.utils import byte2json
 
@@ -34,7 +34,8 @@ def movie_info(request):
             return JsonResponse(
                 {
                     "success": False
-                }
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         result = sorted(result, key=(lambda x: x['userRating']), reverse=True)
@@ -99,7 +100,7 @@ def genre_recommend(request):
 
 def box_office_rank(request):
     if request.method == 'POST':
-        bo = BoxOffice()
+        bo = MovieAPI()
 
         bo = bo.createBoxOfficeList()
 
@@ -115,3 +116,49 @@ def box_office_rank(request):
             card_list.append(card)
 
         return JsonResponse(carouselOutput("basicCard", card_list))
+
+def now_playing(request):
+    if request.method == 'POST':
+        np = MovieAPI()
+
+        """
+        TODO: get order option
+        open (개봉)
+        point (참여, 평점)
+        """
+        order = 'open'
+
+        np = np.createNowPlaying(order)
+
+        item_card = []
+        for item in np:
+            item_list = [
+                {
+                    "title": "개봉일",
+                    "description": item['date']
+                },
+                {
+                    "title": "등급",
+                    "description": ("연령 등급 없음" if item['age'] == None else item['age'])
+                },
+                {
+                    "title": "평점 • 참여수",
+                    "description": "⭐ " + str(item['star']) + " | " + str(item['man']) + "명"
+                }
+            ]
+
+            item_card.append(itemCard(
+                title=item['title'],
+                desc="",
+                img=item['img'],
+                itemList=item_list,
+                btnList=[
+                    {
+                        "label":  "영화 상세 정보",
+                        "action": "webLink",
+                        "webLinkUrl": item['link']
+                    }
+                ]
+            ))
+
+        return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"{order}순으로 정렬된 목록입니다."))
