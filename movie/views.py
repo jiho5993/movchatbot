@@ -162,3 +162,41 @@ def now_playing(request):
             ))
 
         return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"{order}순으로 정렬된 목록입니다."))
+
+def upcoming_movie(request):
+    if request.method == 'POST':
+        # 이번 달, 다음 달 개봉일 영화를 데이터로 기대지수순으로 정렬한 데이터를 가져온다.
+        um = MovieAPI()
+        um = um.createUpcomingMovie()
+
+        item_card = []
+        for movie in um:
+            item_list = [
+                {
+                    "title": "개봉일",
+                    "description": movie['open_dt']
+                },
+                {
+                    "title": "등급",
+                    "description": movie['age']
+                },
+                {
+                    "title": "좋아요 • 싫어요",
+                    "description": str(movie['star'][0]) + " • " + str(movie['star'][1])
+                }
+            ]
+
+            item_card.append(itemCard(
+                title=movie['title'],
+                desc='',
+                img=movie['img'],
+                itemList=item_list,
+                btnList=[
+                    {
+                        "label":  "영화 상세 정보",
+                        "action": "webLink",
+                        "webLinkUrl": movie['link']
+                    }
+                ]
+            ))
+        return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"이번 달, 다음 달 개봉일 영화를 기대지수순으로 정렬한 목록입니다."))

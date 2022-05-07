@@ -221,3 +221,71 @@ class MovieAPI:
             res = sorted(res, key=(lambda x: (x['man'], x['star'])), reverse=True)
 
         return res
+
+    def __getUpcomingMovie(self):
+        _url = "https://movie.naver.com/movie/running/premovie.naver"
+        html = requests.get(_url)
+        soup = bs(html.text, 'html.parser')
+        
+        res = soup.select("#content > div.article > div.obj_section > div.lst_wrap")
+        return res
+
+    def createUpcomingMovie(self):
+        res = []
+
+        item_list = self.__getUpcomingMovie()
+
+        m = datetime.now().month
+
+        for i in item_list:
+            day = i.select_one("div.day_t1")
+            day = re.sub(' |\r|\n|\t|[yyyy.MM.dd (dayOfWeek)]', '', day.text)
+            parse_type = "%Y%m%d"
+            if len(day) == 6:
+                parse_type = "%Y%m"
+            elif len(day) == 4:
+                continue
+            open_date = datetime.strptime(day, parse_type)
+
+            """
+            이번 달, 다음 달이 개봉이 아니면 거름
+            TODO: 12, 1 계산
+            """
+            if open_date.month != m and open_date.month != m+1:
+                continue
+            
+            movie_list = i.select("ul.lst_detail_t1 > li")
+
+            for movie in movie_list:
+                # 제목, 연령 등 데이터를 포함하는 태그
+                info = movie.select_one("dl.lst_dsc")
+
+                # 제목, 연령
+                title = info.select_one("dt.tit > a").text
+                age = info.select_one("dt.tit > span")
+                if age is not None:
+                    age = age.text
+                else:
+                    age = "연령 등급 없음"
+
+                # 기대지수 (좋아요, 싫어요)
+                star = info.select("dd.star > dl.info_exp > dd > div.star_t1 > em")
+                star = (int(star[0].text), int(star[1].text))
+
+                # 이미지, 링크
+                img = movie.select_one("div.thumb > a > img")
+                link = movie.select_one("div.thumb > a")
+
+                res.append(dict(
+                    open_dt=day,
+                    title=title,
+                    age=age,
+                    star=star,
+                    img=img['src'],
+                    link=f"https://movie.naver.com{link['href']}"
+                ))
+
+        # 기대지수순으로 정렬
+        res = sorted(res, key=lambda x: sum(x['star']), reverse=True)
+                
+        return res
