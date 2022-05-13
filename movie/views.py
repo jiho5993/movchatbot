@@ -1,14 +1,16 @@
+import pandas as pd
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 
 from pprint import pprint
-from common.interface.res_interface import TextAndCarouselOutput, basicCard, carouselOutput, itemCard
+from common.interface.res_interface import *
 
 from common.movie_info import MovieAPI
 from common.userrating_recommend import UserRating_Recommend
 
-from common.utils import byte2json
+from common.utils import byte2json, create_movie_info
 
 # Create your views here.
 def index(request):
@@ -21,6 +23,7 @@ def index(request):
             }
         )
 
+# 영화 정보 조회
 def movie_info(request):
     json_result = byte2json(request.body)
     query = json_result["action"]["params"]["sys_movie_name"]
@@ -42,62 +45,15 @@ def movie_info(request):
         movie_card = []
 
         for mov in result:
-            if mov['actor'] == "":
-                actors = "배우 없음"
-            else:
-                actors = mov['actor'].split('|')[:2]
-                actors = ", ".join(actors) + " 등"
-
-            if mov['director'] == "":
-                directors = "감독 없음"
-            else:
-                directors = mov['director'].split('|')[:2]
-                directors = ", ".join(directors)
-
-            itemList = [
-                {
-                    "title": "장르",
-                    "description": mov['genre']
-                },
-                {
-                    "title": "국가",
-                    "description": ("국가 없음" if mov['nation'] == None else mov['nation'])
-                },
-                {
-                    "title": "러닝 타임",
-                    "description": mov["playtime"]
-                },
-                {
-                    "title": "감독 • 배우",
-                    "description": directors + " | " + actors
-                },
-                {
-                    "title": "등급",
-                    "description": ("연령 등급 없음" if mov['age'] == None else mov['age'])
-                }
-            ]
-
-            btnList = [
-                {
-                    "action": "webLink",
-                    "label": "상세 정보 주소",
-                    "webLinkUrl": mov['link']
-                }
-            ]
-
-            movie_card.append(itemCard(
-                title=mov['title'],
-                desc="⭐ " + str(mov['userRating']),
-                img=mov['image'],
-                itemList=itemList,
-                btnList=btnList
-            ))
+            movie_card.append(create_movie_info(mov))
 
         return JsonResponse(carouselOutput("itemCard", movie_card))
 
+# 장르 추천
 def genre_recommend(request):
     pass
 
+# 박스오피스 순위
 def box_office_rank(request):
     if request.method == 'POST':
         bo = MovieAPI()
@@ -117,6 +73,7 @@ def box_office_rank(request):
 
         return JsonResponse(carouselOutput("basicCard", card_list))
 
+# 현재상영작 리스트
 def now_playing(request):
     if request.method == 'POST':
         np = MovieAPI()
@@ -163,6 +120,7 @@ def now_playing(request):
 
         return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"{order}순으로 정렬된 목록입니다."))
 
+# 개봉예정작 리스트
 def upcoming_movie(request):
     if request.method == 'POST':
         # 이번 달, 다음 달 개봉일 영화를 데이터로 기대지수순으로 정렬한 데이터를 가져온다.
@@ -200,3 +158,52 @@ def upcoming_movie(request):
                 ]
             ))
         return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"이번 달, 다음 달 개봉일 영화를 기대지수순으로 정렬한 목록입니다."))
+
+"""
+특정 영화 상영 질문
+is_show_movie : 상영 판별 결과 목록 반환 (api 요청이 여기서부터 시작되는 코드)
+show_movie_info : 판별 결과중 상영중인 영화만 유저에게 응답, quick reply로 블록 연계
+"""
+def is_show_movie(req):
+    json_result = byte2json(req.body)
+    query = json_result["action"]["params"]["sys_movie_name"]
+
+    movie = MovieAPI()
+
+    _movie_list = movie.movie_info_naver(query)
+
+    _now_playing = pd.read_csv('./staticfiles/now_playing_movie.csv')
+
+    result = []
+
+    for movie in _movie_list:
+        is_find = _now_playing.loc[_now_playing['title'] == movie['title']]
+        
+        result.append((movie, is_find.shape[0] != 0))
+
+    return result
+
+def show_movie_info(request):
+    if request.method == 'POST':
+        ml = is_show_movie(request)
+
+        item_card = []
+
+        for mov, is_show in ml:
+            if is_show is False:
+                continue
+            
+            item_card.append(create_movie_info(mov))
+        
+        if len(item_card) == 0:
+            output = [
+                {
+                    "simpleText": {
+                        "text": "현재 상영중인 영화가 없습니다."
+                    }
+                }
+            ]
+
+            return JsonResponse(basicOutput(output))
+
+        return JsonResponse(carouselOutput("itemCard", item_card))        

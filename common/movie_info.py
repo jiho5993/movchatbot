@@ -162,7 +162,7 @@ class MovieAPI:
         res = soup.select("#content > div.article > div > div.lst_wrap > ul > li")
         return res
 
-    def createNowPlaying(self, order='open'):
+    def createNowPlaying(self, order='open', only_display=True):
         res = []
 
         movie_list = self.__getNowPlaying()
@@ -180,7 +180,7 @@ class MovieAPI:
 
                 date_diff = now - open_date
 
-                if date_diff.days > 15:
+                if only_display is True and date_diff.days > 15:
                     break
 
                 # age

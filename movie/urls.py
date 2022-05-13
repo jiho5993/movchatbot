@@ -7,5 +7,6 @@ urlpatterns = [
     path('genre', views.genre_recommend),
     path('box-office', views.box_office_rank),
     path('now-playing', views.now_playing),
-    path('upcoming', views.upcoming_movie)
+    path('upcoming', views.upcoming_movie),
+    path('is-show-movie', views.show_movie_info)
 ]
