@@ -188,12 +188,18 @@ def show_movie_info(request):
         ml = is_show_movie(request)
 
         item_card = []
+        quick_replies = []
 
         for mov, is_show in ml:
             if is_show is False:
                 continue
             
             item_card.append(create_movie_info(mov))
+            quick_replies.append(quickReplies(
+                label=mov['title'],
+                msgText=mov['title'],
+                blockId="627dfc9445b5fc310645ddda"
+            ))
         
         if len(item_card) == 0:
             output = [
@@ -206,4 +212,4 @@ def show_movie_info(request):
 
             return JsonResponse(basicOutput(output))
 
-        return JsonResponse(carouselOutput("itemCard", item_card))        
+        return JsonResponse(QuickRepliesAndCarouselOutput("itemCard", item_card, quick_replies))

@@ -50,6 +50,25 @@ def TextAndCarouselOutput(type, output, text):
 
     return result
 
+# https://chatbot.kakao.com/docs/skill-response-format#quickreplies
+def QuickRepliesAndCarouselOutput(type, output, quickReplies):
+    result = {
+        "version": "2.0",
+        "template": {
+            "outputs": [
+                {
+                    "carousel": {
+                        "type": type,
+                        "items": output
+                    }
+                }
+            ],
+            "quickReplies": quickReplies
+        }
+    }
+
+    return result
+
 # https://chatbot.kakao.com/docs/skill-response-format#basiccard
 def basicCard(title, desc, img, btnList):
     result = {
@@ -66,17 +85,28 @@ def basicCard(title, desc, img, btnList):
 # https://chatbot.kakao.com/docs/skill-response-format#itemcard
 def itemCard(title, desc, img, itemList, btnList):
     result = {
-            "imageTitle": {
-                "title": title,
-                "description": desc
-            },
-            "thumbnail": {
-                "imageUrl": img,
-                "width": 800,
-                "height": 400
-            },
-            "itemList": itemList,
-            "buttons": btnList
-        }
+        "imageTitle": {
+            "title": title,
+            "description": desc
+        },
+        "thumbnail": {
+            "imageUrl": img,
+            "width": 800,
+            "height": 400
+        },
+        "itemList": itemList,
+        "buttons": btnList
+    }
+
+    return result
+
+# https://chatbot.kakao.com/docs/skill-response-format#quickreplies
+def quickReplies(label, msgText, blockId, action="block"):
+    result = {
+        "label": label,
+        "action": action,
+        "messageText": msgText,
+        "blockId": blockId
+    }
 
     return result
