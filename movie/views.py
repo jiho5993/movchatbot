@@ -246,6 +246,16 @@ def get_loc_info(request):
 
         # result -> json_result['userRequest']['utterance']
 
-        pprint(json_result)
+        movie_name = json_result['userRequest']['utterance']
+        loc = json_result["action"]["detailParams"]["loc1"]["origin"]
 
-        return JsonResponse(json_result)
+        """fill my logic"""
+
+        res = []
+        res.append({
+            "simpleText": {
+                "text": movie_name + " | " + loc
+            }
+        })
+
+        return JsonResponse(basicOutput(res))
