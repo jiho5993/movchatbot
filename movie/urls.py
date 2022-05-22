@@ -9,5 +9,5 @@ urlpatterns = [
     path('now-playing', views.now_playing),
     path('upcoming', views.upcoming_movie),
     path('is-show-movie', views.show_movie_info),
-    path('foo', views.get_loc_info)
+    path('book', views.booking_movie)
 ]

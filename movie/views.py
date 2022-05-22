@@ -163,7 +163,7 @@ def upcoming_movie(request):
 특정 영화 상영 질문
 is_show_movie : 상영 판별 결과 목록 반환 (api 요청이 여기서부터 시작되는 코드)
 show_movie_info : 판별 결과중 상영중인 영화만 유저에게 응답, quick reply로 블록 연계
-get_loc_info : 블록 연계 후, 위치 정보 input
+booking_movie : 블록 연계 후, 사용자가 선택한 영화 예매링크 제공
 """
 def is_show_movie(req):
     json_result = byte2json(req.body)
@@ -215,47 +215,35 @@ def show_movie_info(request):
 
         return JsonResponse(QuickRepliesAndCarouselOutput("itemCard", item_card, quick_replies))
 
-"""
-req result
-{
-	"action": {
-		"clientExtra": {},
-		"detailParams": {
-			"loc1": {
-				"groupName": "",
-				"origin": "수원시 인계동",
-				"value": "인계동"
-			}
-		},
-		"id": "627f93a99ac8ed784416a9ad",
-		"name": "test",
-		"params": {
-			"loc1": "인계동"
-		}
-	},
-    ...
-	"userRequest": {
-		...
-		"utterance": "닥터 스트레인지: 대혼돈의 멀티버스"
-	}
-}
-"""
-def get_loc_info(request):
+def booking_movie(request):
     if request.method == 'POST':
         json_result = byte2json(request.body)
-
-        # result -> json_result['userRequest']['utterance']
-
         movie_name = json_result['userRequest']['utterance']
-        loc = json_result["action"]["detailParams"]["loc1"]["origin"]
 
-        """fill my logic"""
+        _now_playing = pd.read_csv('./staticfiles/now_playing_movie.csv')
 
-        res = []
-        res.append({
-            "simpleText": {
-                "text": movie_name + " | " + loc
+        movie_data = _now_playing.loc[_now_playing['title'] == movie_name]
+        index = movie_data.index[0]
+
+        btn_list = [
+            {
+                "action": "webLink",
+                "label": "예약하러가기",
+                "webLinkUrl": movie_data.loc[index, 'book']
             }
-        })
+        ]
 
-        return JsonResponse(basicOutput(res))
+        basic_card = [
+            basicCard(
+                title=movie_name,
+                desc="",
+                img=movie_data.loc[index, 'img'],
+                btnList=btn_list
+            )
+        ]
+
+        return JsonResponse(TextAndCarouselOutput(
+            type="basicCard",
+            output=basic_card,
+            text=f"{movie_name}을 선택하셨습니다. 예매하기 버튼을 눌러주세요."
+        ))
