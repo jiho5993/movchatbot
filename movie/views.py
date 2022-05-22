@@ -8,9 +8,9 @@ from pprint import pprint
 from common.interface.res_interface import *
 
 from common.movie_info import MovieAPI
-from common.userrating_recommend import UserRating_Recommend
+from common.genre_recommender import GenreRecommender
 
-from common.utils import byte2json, create_movie_info
+from common.utils import *
 
 # Create your views here.
 def index(request):
@@ -45,13 +45,73 @@ def movie_info(request):
         movie_card = []
 
         for mov in result:
-            movie_card.append(create_movie_info(mov))
+            movie_card.append(create_response_movie_info(mov))
 
         return JsonResponse(carouselOutput("itemCard", movie_card))
 
 # 장르 추천
 def genre_recommend(request):
-    pass
+    if request.method == 'POST':
+        json_result = byte2json(request.body)
+        type = json_result['action']['params']['Genre']
+
+        gr = GenreRecommender(type)
+        rec_list = gr.recommend()
+
+        item_card = []
+
+        for item in rec_list:
+            if len(item_card) == 5:
+                break
+
+            movie_info = get_movie_info(item['link'], get_img=True)
+            if movie_info is None:
+                continue
+
+            genre = movie_info['genre']
+            nation = movie_info['nation']
+            age_info = movie_info['age_info']
+            img = movie_info['img']
+
+            item_list = [
+                {
+                    "title": "장르",
+                    "description": genre
+                },
+                {
+                    "title": "국가",
+                    "description": ("국가 없음" if nation == None else nation)
+                },
+                {
+                    "title": "등급",
+                    "description": ("연령 등급 없음" if age_info == None else age_info)
+                }
+            ]
+
+            btn_list = [
+                {
+                    "action": "webLink",
+                    "label": "상세 정보 주소",
+                    "webLinkUrl": item['link']
+                }
+            ]
+
+            item_card.append(itemCard(
+                title=item['title'],
+                desc="",
+                img=img,
+                itemList=item_list,
+                btnList=btn_list
+            ))
+
+        return JsonResponse(TextAndCarouselOutput(
+            type='itemCard',
+            output=item_card,
+            text=f'{type}(으)로 조회한 결과입니다.\n' \
+                '개봉전 영화도 포함되어 있을 수도 있습니다.\n' \
+                '더보기를 원하시는 경우 아래의 링크를 클릭해주세요.\n' \
+                f'https://movie.naver.com/movie/sdb/rank/rmovie.naver?sel=cnt&date={gr.date}&tg={gr.genre_index}'
+        ))
 
 # 박스오피스 순위
 def box_office_rank(request):
@@ -195,7 +255,7 @@ def show_movie_info(request):
             if is_show is False:
                 continue
             
-            item_card.append(create_movie_info(mov))
+            item_card.append(create_response_movie_info(mov))
             quick_replies.append(quickReplies(
                 label=mov['title'],
                 msgText=mov['title'],

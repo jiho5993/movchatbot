@@ -10,6 +10,8 @@ from decouple import config
 
 from pprint import pprint
 
+from common.utils import get_movie_info
+
 class MovieAPI:
     def __init__(self):
         self.NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
@@ -31,56 +33,15 @@ class MovieAPI:
         
         review = f'https://movie.naver.com/movie/bi/mi/point.naver?code={code}'
 
-        url_res = requests.get(movie_link)
-        soup = bs(url_res.text,'html.parser')
-
-        # global new_info
-        new_info = soup.select("dl.info_spec")[0]
-
-        is_span = new_info.find_all("span")
-        
-        playtime, genre, nation, pubDate_info = None, [], None, []
-
-        for i in is_span:
-            filtered = i.select("a")
-
-            if filtered == [] and playtime == None: # playtime
-                playtime = i.get_text().strip()
-            else: # genre / nation / pubDate_info
-                for info in filtered:
-                    p = re.compile("genre|nation|open")
-                    state = p.findall(info['href'])
-
-                    if len(state) == 0:
-                        continue
-
-                    text = info.get_text().strip()
-                    
-                    if state[0] == "genre":
-                        genre.append(text)
-                    elif state[0] == "nation":
-                        if nation is not None:
-                            nation += ", " + text
-                        else:
-                            nation = text
-                    else:
-                        pubDate_info.append(text)
-
-        genre = ",".join(genre)
-        # 보여줄 장르나 러닝 타임이 없으면 영화 잘라버림
-        if genre == "" or playtime is None:
+        movie_info = get_movie_info(movie_link)
+        if movie_info is None:
             return
 
-        pubDate_info = "".join(pubDate_info)
-        if pubDate_info == "":
-            pubDate_info = None
-
-        age = soup.select("#content > div.article > div.mv_info_area > div:nth-of-type(1) > dl.info_spec > dd > p > a")
-        age_info = None
-        for ages in age:
-            if ages['href'].find('grade') != -1:
-                age_info = ages.get_text()
-                break
+        playtime = movie_info['playtime']
+        genre = movie_info['genre']
+        nation = movie_info['nation']
+        pubDate_info = movie_info['pubDate_info']
+        age_info = movie_info['age_info']
 
         outline_dict = dict(
             review=review,

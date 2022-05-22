@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'common',
     'movie',
-    'theater'
+    'theater',
+    'test'
 ]
 
 MIDDLEWARE = [
