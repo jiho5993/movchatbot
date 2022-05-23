@@ -147,14 +147,10 @@ def box_office_rank(request):
 # 현재상영작 리스트
 def now_playing(request):
     if request.method == 'POST':
+        json_result = byte2json(request.body)
         np = MovieAPI()
 
-        """
-        TODO: get order option
-        open (개봉)
-        point (참여, 평점)
-        """
-        order = 'open'
+        order = json_result['action']['params']['now_playing_order_option']
 
         np = np.createNowPlaying(order)
 
@@ -188,6 +184,11 @@ def now_playing(request):
                     }
                 ]
             ))
+
+        if order == 'open':
+            order = '개봉'
+        else:
+            order = '평점, 참여'
 
         return JsonResponse(TextAndCarouselOutput("itemCard", item_card, f"{order}순으로 정렬된 목록입니다."))
 
