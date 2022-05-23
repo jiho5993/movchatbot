@@ -22,8 +22,8 @@ class MovieAPI:
         data['userRating'] = float(data['userRating'])
 
         # 기저 사례 처리
-        # 평점이 5.0 미만이거나 이미지가 없으면 잘라버림
-        if data['userRating'] < 5.0 or data['image'] == "":
+        # 평점이 4.0 미만이거나 이미지가 없으면 잘라버림
+        if data['userRating'] < 4.0 or data['image'] == "":
             return
 
         data['title'] = re.sub('<b>|</b>', '', data['title']) # 영화 제목에 들어간 <b> </b> 태그 제거

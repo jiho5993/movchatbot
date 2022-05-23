@@ -67,7 +67,11 @@ def get_movie_info(link, get_img=False):
     soup = bs(url_res.text,'html.parser')
 
     # global new_info
-    new_info = soup.select("dl.info_spec")[0]
+    # 만약 영화데이터가 아니라면 except를 걸어줌
+    try:
+        new_info = soup.select("dl.info_spec")[0]
+    except:
+        return
 
     is_span = new_info.find_all("span")
 

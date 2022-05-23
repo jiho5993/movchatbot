@@ -47,6 +47,17 @@ def movie_info(request):
         for mov in result:
             movie_card.append(create_response_movie_info(mov))
 
+        if len(movie_card) == 0:
+            text = [
+                {
+                    "simpleText": {
+                        "text": f"{query}에 맞는 검색 결과가 없습니다.\n평점이 4점미만인 영화인 경우 검색 대상에서 제외됩니다."
+                    }
+                }
+            ]
+            
+            return JsonResponse(basicOutput(text))
+
         return JsonResponse(carouselOutput("itemCard", movie_card))
 
 # 장르 추천
