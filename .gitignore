@@ -13,3 +13,6 @@ media
 .venv
 .env
 .DS_Store
+
+## data
+*.pickle
