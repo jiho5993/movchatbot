@@ -2,8 +2,11 @@ import pickle
 from django.http import JsonResponse
 
 from django.shortcuts import render
+from sklearn.model_selection import train_test_split
 from common.interface.res_interface import QuickRepliesAndCarouselOutput, basicOutput, quickReplies
 from common.movie_info import MovieAPI
+from common.recommend.recommender import Recommender
+from common.recommend.train import NEW_MF
 
 from common.utils import byte2json, create_response_movie_info
 from common.recommend.save_user import DataSave
@@ -87,9 +90,75 @@ def save_data(request):
 
         return JsonResponse(basicOutput(output, quick_replies))
 
-def train():
-    return
+def train(request):
+    path = './recommender/data'
 
-def rec(request):
-    # test = user_recommender()
-    return """추천"""
+    with open(f"{path}/datas.pickle", "rb") as f:
+        df = pickle.load(f)
+
+    ratings = df[['UserID', 'MovieID', "Rating"]]
+
+    ratings.columns = ['user_id', 'movie_id', 'rating']
+
+    R_temp = ratings.astype(int).pivot(index='user_id', columns='movie_id', values='rating').fillna(0)
+    ratings_train, ratings_test = train_test_split(ratings.astype(int),
+												test_size=0.2,
+												shuffle=True,
+												random_state=2021)
+
+    hyper_params = {
+        'K' : 30, # 이게 너무 크면 과적합
+        'alpha' : 0.001,
+        'beta' : 0.02,
+        'iterations' : 30, # 이것도 과적합 가능성
+        'verbose' : False
+    }
+
+    mf = NEW_MF(R_temp, hyper_params)
+    mf.set_test(ratings_test)
+    mf.test()
+
+    with open(f"{path}/model.pickle", "wb") as f:
+        pickle.dump(mf.full_prediction(), f)
+
+    return JsonResponse({
+        "success": True
+    })
+
+def start_recommend(request):
+    if request.method == 'POST':
+        json_result = byte2json(request.body)
+        rc = Recommender(json_result)
+
+        if rc.isUser is True:
+            g = rc.genre_extract()
+            m = rc.recommender_movie(10)
+
+            # print("============================================================")
+            # print(g)
+            # print(m)
+            # print("============================================================")
+
+            result = ', '.join(m)
+
+            result = f"추천 결과입니다.\n{result}"
+
+            text = [
+                {
+                    "simpleText": {
+                        "text": result
+                    }
+                },
+            ]
+
+            return JsonResponse(basicOutput(text))
+        else:
+            text = [
+                {
+                    "simpleText": {
+                        "text": "추천을 받기 위한 등록된 데이터가 없습니다.\n데이터 추가 후 이용해주시기 바랍니다."
+                    }
+                },
+            ]
+
+            return JsonResponse(basicOutput(text))
