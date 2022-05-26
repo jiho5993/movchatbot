@@ -78,7 +78,7 @@ def save_data(request):
                 action='block',
                 label='예',
                 msgText='예',
-                blockId='628c799793b31d5b60ab62fc'
+                blockId='628c583e055a574d7df55691'
             ),
             quickReplies(
                 action='block',

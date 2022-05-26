@@ -58,8 +58,8 @@ class DataSave:
         except:
             name = self.user_input_data
             genre = '장르없음'
-        rating = random.randrange(7,11)
-        data.append([name, movie_id, genre, rating, int(user_id), review])
+        rating = 10
+        data.append([name, int(movie_id), genre, rating, int(user_id), review])
 
         df = pd.DataFrame(data, columns=columns)
 
@@ -70,7 +70,7 @@ class DataSave:
             movie = self.Review_Datas_df[self.Review_Datas_df['MovieName'] == self.user_input_data].iloc[0]
             movie_id = str(movie['MovieID'])
         except:
-            movie_id = str(self.Review_Datas_df['MovieID'].max()+1)
+            movie_id = str(int(self.Review_Datas_df['MovieID'].max()) + 1)
         
         if self.isUser:
             self.old_user(movie_id)
