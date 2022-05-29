@@ -23,7 +23,7 @@ else
 
     # run container
     echo "=> Run container..."
-    docker run -d -p 80:3000 --name movchatbot jiho5993/movchatbot
+    docker run -d -p 80:3000 --restart unless-stopped --name movchatbot jiho5993/movchatbot
 
     # prune image
     echo "=> Prune previous image..."

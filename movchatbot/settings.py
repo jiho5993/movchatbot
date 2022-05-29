@@ -134,4 +134,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # django_heroku.settings(locals())
 
 # File upload size
-FILE_UPLOAD_MAX_MEMORY_SIZE = 120000000
+FILE_UPLOAD_MAX_MEMORY_SIZE = 500000000
