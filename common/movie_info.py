@@ -55,7 +55,7 @@ class MovieAPI:
 
         return data
 
-    def movie_info_naver(self, name):
+    def movie_info_naver(self, name, ml_filtering=False):
         _url = f"https://openapi.naver.com/v1/search/movie.json?query={name}&display=20"
         _header = {
             "X-Naver-Client-Id": self.NAVER_CLIENT_ID,
@@ -66,6 +66,10 @@ class MovieAPI:
 
         if res.status_code == 200:
             data = res.json()
+
+            if ml_filtering is True:
+                if data['total'] > 1:
+                    return
 
             pool = Pool(self.NUM_CORES)
 
