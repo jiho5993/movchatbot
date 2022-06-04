@@ -1,9 +1,10 @@
 import pickle
+from pprint import pprint
 from django.http import JsonResponse
 
 from django.shortcuts import render
 from sklearn.model_selection import train_test_split
-from common.interface.res_interface import QuickRepliesAndCarouselOutput, basicOutput, quickReplies
+from common.interface.res_interface import QuickRepliesAndCarouselOutput, TextAndCarouselOutput, basicOutput, quickReplies
 from common.movie_info import MovieAPI
 from common.recommend.recommender import Recommender
 from common.recommend.train import NEW_MF
@@ -131,27 +132,36 @@ def start_recommend(request):
         rc = Recommender(json_result)
 
         if rc.isUser is True:
-            g = rc.genre_extract()
-            m = rc.recommender_movie(10)
+            m = rc.recommender_movie(20)
 
-            # print("============================================================")
-            # print(g)
-            # print(m)
-            # print("============================================================")
+            m_api = MovieAPI()
 
-            result = ', '.join(m)
+            out_result = ""
+            movie_items = []
+            selected_data = set()
 
-            result = f"추천 결과입니다.\n{result}"
+            for m_title in m:
+                data = m_api.movie_info_naver(m_title, ml_filtering=True)
+                if data is not None and len(movie_items) < 3:
+                    movie_items.append(data[0])
+                    selected_data.add(m_title)
+                else:
+                    out_result += "\n" + m_title
+                
+                if len(movie_items) == 3:
+                    break
 
-            text = [
-                {
-                    "simpleText": {
-                        "text": result
-                    }
-                },
-            ]
+            filtered_data = list(set(m) - selected_data)[:7]
 
-            return JsonResponse(basicOutput(text))
+            text = "\n".join(filtered_data)
+            text = f"상위 3개 데이터와 그 외 7개의 추천 결과입니다.\n{text}"
+
+            movie_card = []
+
+            for mov in movie_items:
+                movie_card.append(create_response_movie_info(mov))
+
+            return JsonResponse(TextAndCarouselOutput("itemCard", movie_card, text))
         else:
             text = [
                 {

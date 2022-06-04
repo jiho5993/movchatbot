@@ -1,6 +1,7 @@
 import json
 import requests
 import re
+import html
 
 from bs4 import BeautifulSoup as bs
 
@@ -54,8 +55,11 @@ def create_response_movie_info(mov):
         }
     ]
 
+    # 영화 제목에 특수 문자가 삽입되는 버그
+    title = html.unescape(mov['title'])
+
     return itemCard(
-        title=mov['title'],
+        title=title,
         desc="⭐ " + str(mov['userRating']),
         img=mov['image'],
         itemList=itemList,
