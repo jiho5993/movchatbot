@@ -317,5 +317,5 @@ def booking_movie(request):
         return JsonResponse(TextAndCarouselOutput(
             type="basicCard",
             output=basic_card,
-            text=f"{movie_name}을 선택하셨습니다. 예매하기 버튼을 눌러주세요."
+            text=f"{movie_name}을 선택하셨습니다.\n예매를 원하시는 경우, 예매하기 버튼을 눌러주세요."
         ))

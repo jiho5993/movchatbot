@@ -154,7 +154,7 @@ def start_recommend(request):
             filtered_data = list(set(m) - selected_data)[:7]
 
             text = "\n".join(filtered_data)
-            text = f"상위 3개 데이터와 그외 7개의 추천 결과입니다.\n{text}"
+            text = f"상위 3개 데이터와 그 외 7개의 추천 결과입니다.\n{text}"
 
             movie_card = []
 
