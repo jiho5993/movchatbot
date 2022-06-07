@@ -1,4 +1,5 @@
 import pickle
+import requests
 from pprint import pprint
 from django.http import JsonResponse
 
@@ -52,19 +53,7 @@ def save_data(request):
     if request.method == 'POST':
         json_result = byte2json(request.body)
 
-        ds = DataSave(json_result)
-        new_data = ds.save_data()
-
-        new_user_dataset = new_data[0]
-        new_movie_dataset = new_data[1]
-
-        path = './recommender/data'
-
-        with open(f'{path}/users.pickle', 'wb') as f:
-            pickle.dump(new_user_dataset, f)
-
-        with open(f'{path}/datas.pickle', 'wb') as f:
-            pickle.dump(new_movie_dataset, f)
+        requests.post('http://3.37.146.113/rec/', json=json_result)
 
         output = [
             {
@@ -92,35 +81,9 @@ def save_data(request):
         return JsonResponse(basicOutput(output, quick_replies))
 
 def train(request):
-    path = './recommender/data'
-
-    with open(f"{path}/datas.pickle", "rb") as f:
-        df = pickle.load(f)
-
-    ratings = df[['UserID', 'MovieID', "Rating"]]
-
-    ratings.columns = ['user_id', 'movie_id', 'rating']
-
-    R_temp = ratings.astype(int).pivot(index='user_id', columns='movie_id', values='rating').fillna(0)
-    ratings_train, ratings_test = train_test_split(ratings.astype(int),
-												test_size=0.2,
-												shuffle=True,
-												random_state=2021)
-
-    hyper_params = {
-        'K' : 30, # 이게 너무 크면 과적합
-        'alpha' : 0.001,
-        'beta' : 0.02,
-        'iterations' : 30, # 이것도 과적합 가능성
-        'verbose' : False
-    }
-
-    mf = NEW_MF(R_temp, hyper_params)
-    mf.set_test(ratings_test)
-    mf.test()
-
-    with open(f"{path}/model.pickle", "wb") as f:
-        pickle.dump(mf.full_prediction(), f)
+    json_result = byte2json(request.body)
+    # requests.post('http://3.37.146.113/rec/t', json=json_result)
+    pprint(json_result)
 
     return JsonResponse({
         "success": True
@@ -129,46 +92,39 @@ def train(request):
 def start_recommend(request):
     if request.method == 'POST':
         json_result = byte2json(request.body)
-        rc = Recommender(json_result)
 
-        if rc.isUser is True:
-            m = rc.recommender_movie(20)
+        rec_result = requests.post('http://3.37.146.113/rec/start', json=json_result)
+        m = byte2json(rec_result.content)
 
-            m_api = MovieAPI()
+        if rec_result.status_code != 200:
+            return JsonResponse(m)
 
-            out_result = ""
-            movie_items = []
-            selected_data = set()
+        m = m['movie']
+        m_api = MovieAPI()
 
-            for m_title in m:
-                data = m_api.movie_info_naver(m_title, ml_filtering=True)
-                if data is not None and len(movie_items) < 3:
-                    movie_items.append(data[0])
-                    selected_data.add(m_title)
-                else:
-                    out_result += "\n" + m_title
-                
-                if len(movie_items) == 3:
-                    break
+        out_result = ""
+        movie_items = []
+        selected_data = set()
 
-            filtered_data = list(set(m) - selected_data)[:7]
+        for m_title in m:
+            data = m_api.movie_info_naver(m_title, ml_filtering=True)
+            if data is not None and len(movie_items) < 3:
+                movie_items.append(data[0])
+                selected_data.add(m_title)
+            else:
+                out_result += "\n" + m_title
+            
+            if len(movie_items) == 3:
+                break
 
-            text = "\n".join(filtered_data)
-            text = f"상위 3개 데이터와 그 외 7개의 추천 결과입니다.\n{text}"
+        filtered_data = list(set(m) - selected_data)[:7]
 
-            movie_card = []
+        text = "\n".join(filtered_data)
+        text = f"상위 3개 데이터와 그 외 7개의 추천 결과입니다.\n{text}"
 
-            for mov in movie_items:
-                movie_card.append(create_response_movie_info(mov))
+        movie_card = []
 
-            return JsonResponse(TextAndCarouselOutput("itemCard", movie_card, text))
-        else:
-            text = [
-                {
-                    "simpleText": {
-                        "text": "추천을 받기 위한 등록된 데이터가 없습니다.\n데이터 추가 후 이용해주시기 바랍니다."
-                    }
-                },
-            ]
+        for mov in movie_items:
+            movie_card.append(create_response_movie_info(mov))
 
-            return JsonResponse(basicOutput(text))
+        return JsonResponse(TextAndCarouselOutput("itemCard", movie_card, text))
