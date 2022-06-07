@@ -5,6 +5,8 @@ from django.http import JsonResponse
 
 from django.shortcuts import render
 from sklearn.model_selection import train_test_split
+from decouple import config
+
 from common.interface.res_interface import QuickRepliesAndCarouselOutput, TextAndCarouselOutput, basicOutput, quickReplies
 from common.movie_info import MovieAPI
 from common.recommend.recommender import Recommender
@@ -53,7 +55,8 @@ def save_data(request):
     if request.method == 'POST':
         json_result = byte2json(request.body)
 
-        requests.post('http://3.37.146.113/rec/', json=json_result)
+        ML_SERVER_HOST = config("ML_SERVER_HOST")
+        requests.post(f'{ML_SERVER_HOST}/rec/', json=json_result)
 
         output = [
             {
@@ -82,7 +85,9 @@ def save_data(request):
 
 def train(request):
     json_result = byte2json(request.body)
-    # requests.post('http://3.37.146.113/rec/t', json=json_result)
+
+    # ML_SERVER_HOST = config("ML_SERVER_HOST")
+    # requests.post(f'{ML_SERVER_HOST}/rec/t', json=json_result)
     pprint(json_result)
 
     return JsonResponse({
@@ -93,7 +98,8 @@ def start_recommend(request):
     if request.method == 'POST':
         json_result = byte2json(request.body)
 
-        rec_result = requests.post('http://3.37.146.113/rec/start', json=json_result)
+        ML_SERVER_HOST = config("ML_SERVER_HOST")
+        rec_result = requests.post(f'{ML_SERVER_HOST}/rec/start', json=json_result)
         m = byte2json(rec_result.content)
 
         if rec_result.status_code != 200:
